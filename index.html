@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - Login</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { background: var(--navy); display: flex; align-items: center; justify-content: center; }
+.login-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 44px 48px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--s3);
+}
+.login-org  { font-size: 18px; font-weight: bold; color: var(--navy); margin-bottom: 4px; }
+.login-sub  { font-size: 12px; color: var(--g400); margin-bottom: 28px; }
+.login-heading { font-size: 24px; font-weight: bold; color: var(--navy); margin-bottom: 6px; }
+.login-desc { font-size: 13px; color: var(--g400); margin-bottom: 24px; }
+.role-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: var(--g100);
+  padding: 4px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+.rtab {
+  padding: 9px;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: bold;
+  color: var(--g600);
+  border: none;
+  background: transparent;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.rtab.active { background: var(--navy); color: var(--gold); }
+.fg { margin-bottom: 16px; }
+.fg label {
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--g600);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.fg input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--g200);
+  border-radius: 8px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  color: var(--navy);
+  outline: none;
+  background: var(--white);
+}
+.fg input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,162,39,.1); }
+.btn-login {
+  width: 100%;
+  padding: 13px;
+  background: var(--navy);
+  color: var(--gold);
+  border: none;
+  border-radius: 8px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 6px;
+}
+.btn-login:hover { background: var(--navy2); }
+.login-hint {
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: var(--g100);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--g600);
+  line-height: 1.7;
+}
+.login-hint strong { color: var(--navy); }
+@media (max-width: 500px) { .login-card { padding: 28px 20px; margin: 14px; } }
+</style>
+</head>
+<body>
+<div class="login-card">
+  <div class="login-org">University of Botswana</div>
+  <div class="login-sub">Student Affairs Help Desk</div>
+  <div class="login-heading">Welcome Back</div>
+  <div class="login-desc">Sign in to access the student help desk portal</div>
+
+  <div class="role-tabs">
+    <button class="rtab active" id="tab-student" onclick="setRole('student')">Student</button>
+    <button class="rtab" id="tab-admin" onclick="setRole('admin')">Administrator</button>
+  </div>
+
+  <div class="fg">
+    <label>Student / Staff ID</label>
+    <input type="text" id="loginId" placeholder="e.g. UB23050001 or ADM001">
+  </div>
+  <div class="fg">
+    <label>Password</label>
+    <input type="password" id="loginPw" placeholder="Enter your password" onkeydown="if(event.key==='Enter') doLogin()">
+  </div>
+
+  <button class="btn-login" onclick="doLogin()">Sign In</button>
+
+  <div class="login-hint">
+    <strong>Demo Credentials</strong><br>
+    Student: <strong>UB23050001</strong> / <strong>student123</strong><br>
+    Admin: &nbsp;<strong>ADM001</strong> / <strong>admin123</strong>
+  </div>
+</div>
+
+<script>
+var selectedRole = 'student';
+
+function setRole(role) {
+  selectedRole = role;
+  document.getElementById('tab-student').classList.toggle('active', role === 'student');
+  document.getElementById('tab-admin').classList.toggle('active', role === 'admin');
+}
+
+function doLogin() {
+  var id = document.getElementById('loginId').value.trim();
+  var pw = document.getElementById('loginPw').value.trim();
+  var students = {
+    'UB23050001': { pass: 'student123', name: 'Kefilwe Moeti' },
+    'UB23050002': { pass: 'student123', name: 'Tebogo Kgosi' }
+  };
+  var admins = {
+    'ADM001': { pass: 'admin123', name: 'Dr. Ruth Sebele' }
+  };
+
+  if (selectedRole === 'student') {
+    var s = students[id];
+    if (!s || s.pass !== pw) { alert('Invalid student ID or password.'); return; }
+    sessionStorage.setItem('ub_user', JSON.stringify({ role: 'student', id: id, name: s.name }));
+    window.location.href = 'student-dashboard.html';
+  } else {
+    var a = admins[id];
+    if (!a || a.pass !== pw) { alert('Invalid admin ID or password.'); return; }
+    sessionStorage.setItem('ub_user', JSON.stringify({ role: 'admin', id: id, name: a.name }));
+    window.location.href = 'admin-dashboard.html';
+  }
+}
+</script>
+</body>
+</html>

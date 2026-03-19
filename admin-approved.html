@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - Approved Requests</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
+  <span class="topbar-user" id="topbar-name"></span>
+  <div class="bell-wrap">
+    <a href="admin-pending.html" class="bell-btn">Alerts</a>
+    <span class="bell-count">2</span>
+  </div>
+  <a href="index.html" class="topbar-logout">Log out</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Overview</div>
+      <a href="admin-dashboard.html" class="sb-link">Dashboard</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Requests</div>
+      <a href="admin-pending.html" class="sb-link">Pending</a>
+      <a href="admin-approved.html" class="sb-link active">Approved</a>
+      <a href="admin-denied.html" class="sb-link">Denied</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Analytics</div>
+      <a href="admin-report.html" class="sb-link">Reports</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Help</div>
+      <a href="admin-faq.html" class="sb-link">FAQs</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="ph">
+      <h2>Approved Requests</h2>
+      <p>2 requests approved</p>
+    </div>
+
+    <div class="rcard approved">
+      <div class="r-body">
+        <div class="r-title">Add Course &mdash; CS401 Artificial Intelligence</div>
+        <div class="r-meta"><strong>Kefilwe Moeti</strong> &nbsp;&middot;&nbsp; UB23050001 &nbsp;&middot;&nbsp; 08 Jan 2026 &nbsp;&middot;&nbsp; REQ0002</div>
+        <div class="r-reason">CS401 is a prerequisite for my Honours research thesis. I have completed CS201 and CS301 which are the listed prerequisites.</div>
+        <div class="r-note ok">Decision note: Approved. Prerequisites confirmed. Registered in Section B.</div>
+      </div>
+      <div class="r-right">
+        <span class="tbadge tba">Add a Course</span>
+        <span class="sp sp-approved">Approved</span>
+        <div class="by-note">By Dr. Ruth Sebele<br>09 Jan 2026</div>
+      </div>
+    </div>
+
+    <div class="rcard approved">
+      <div class="r-body">
+        <div class="r-title">Drop Course &mdash; ENG101 Technical Writing</div>
+        <div class="r-meta"><strong>Kefilwe Moeti</strong> &nbsp;&middot;&nbsp; UB23050001 &nbsp;&middot;&nbsp; 05 Jan 2026 &nbsp;&middot;&nbsp; REQ0005</div>
+        <div class="r-reason">ENG101 conflicts with a compulsory CS302 lab session. I will register for the evening section next semester.</div>
+        <div class="r-note ok">Decision note: Approved. Withdrawal recorded. No academic penalty &mdash; within Week 2 deadline.</div>
+      </div>
+      <div class="r-right">
+        <span class="tbadge tbd">Drop a Course</span>
+        <span class="sp sp-approved">Approved</span>
+        <div class="by-note">By Dr. Ruth Sebele<br>06 Jan 2026</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  var u = requireAdmin();
+  if (u) document.getElementById('topbar-name').textContent = u.name;
+</script>
+</body>
+</html>

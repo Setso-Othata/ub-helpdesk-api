@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - Admin Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
+  <span class="topbar-user" id="topbar-name"></span>
+  <div class="bell-wrap">
+    <a href="admin-pending.html" class="bell-btn">Alerts</a>
+    <span class="bell-count">2</span>
+  </div>
+  <a href="index.html" class="topbar-logout">Log out</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Overview</div>
+      <a href="admin-dashboard.html" class="sb-link active">Dashboard</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Requests</div>
+      <a href="admin-pending.html" class="sb-link">Pending</a>
+      <a href="admin-approved.html" class="sb-link">Approved</a>
+      <a href="admin-denied.html" class="sb-link">Denied</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Analytics</div>
+      <a href="admin-report.html" class="sb-link">Reports</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Help</div>
+      <a href="admin-faq.html" class="sb-link">FAQs</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="ph">
+      <h2>Admin Dashboard</h2>
+      <p id="greeting">Welcome back &mdash; Registry Services</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val">5</div>
+        <div class="stat-lbl">Total Requests</div>
+        <div class="stat-sub" style="color:var(--g400)">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">Pending</div>
+        <div class="stat-sub" style="color:var(--amber)">Need your action</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">Approved</div>
+        <div class="stat-sub" style="color:var(--green)">40% approval rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">1</div>
+        <div class="stat-lbl">Denied</div>
+        <div class="stat-sub" style="color:var(--red)">20% of total</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="card">
+          <div class="card-title">Recent Submissions &nbsp;<span style="background:var(--amber-l);color:var(--amber);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:bold;">2 pending</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+              <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);">Extra Credits &mdash; Requesting 21 credits total</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Kefilwe Moeti &middot; 12 Jan 2026</div></div>
+              <span class="sp sp-pending">Pending</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+              <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);">Add Course &mdash; CS401 Artificial Intelligence</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Kefilwe Moeti &middot; 08 Jan 2026</div></div>
+              <span class="sp sp-approved">Approved</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+              <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);">Drop Course &mdash; ENG101 Technical Writing</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Kefilwe Moeti &middot; 05 Jan 2026</div></div>
+              <span class="sp sp-approved">Approved</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+              <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);">Add Course &mdash; STAT201 Statistics I</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Tebogo Kgosi &middot; 03 Jan 2026</div></div>
+              <span class="sp sp-pending">Pending</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+              <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);">Drop Course &mdash; MATH202 Linear Algebra</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Tebogo Kgosi &middot; 20 Dec 2025</div></div>
+              <span class="sp sp-denied">Denied</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title">Requests by Type</div>
+          <div class="bar-row"><div class="bar-label">Extra Credit Load<span class="bar-sub">1 submission</span></div><div class="bar-track"><div class="bar-fill" style="width:20%;background:#1a56db;">20%</div></div><div class="bar-pct">20%</div></div>
+          <div class="bar-row"><div class="bar-label">Add a Course<span class="bar-sub">2 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--green);">40%</div></div><div class="bar-pct">40%</div></div>
+          <div class="bar-row"><div class="bar-label">Drop a Course<span class="bar-sub">2 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--red);">40%</div></div><div class="bar-pct">40%</div></div>
+          <div class="bar-row"><div class="bar-label">Change Program<span class="bar-sub">0 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber);"></div></div><div class="bar-pct">0%</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">FAQs &mdash; Quick Reference</div>
+          <div class="faq-item" id="ad1"><div class="faq-q" onclick="toggleFaq('ad1')"><span>How do I approve or deny a request?</span><span class="faq-chevron">v</span></div><div class="faq-a">Navigate to "Pending Requests" from the sidebar. Each request shows the student's details, reason, and type. Use the Approve or Deny buttons to action each request.</div></div>
+          <div class="faq-item" id="ad2"><div class="faq-q" onclick="toggleFaq('ad2')"><span>What does the report page show?</span><span class="faq-chevron">v</span></div><div class="faq-a">The Reports page shows total requests, status counts, a bar chart by type, a donut chart, and a full submissions table.</div></div>
+          <div class="faq-item" id="ad3"><div class="faq-q" onclick="toggleFaq('ad3')"><span>What request types can students submit?</span><span class="faq-chevron">v</span></div><div class="faq-a">Students can submit four types: Extra Credit Load, Add a Course, Drop a Course, and Change Programme of Study.</div></div>
+          <div style="margin-top:12px;text-align:right;">
+            <a href="admin-faq.html" style="font-size:13px;color:var(--blue);font-weight:bold;text-decoration:none;">View all FAQs &gt;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  var u = requireAdmin();
+  if (u) {
+    document.getElementById('topbar-name').textContent = u.name;
+    document.getElementById('greeting').textContent = 'Welcome back, ' + u.name + ' \u2014 Registry Services';
+  }
+</script>
+</body>
+</html>

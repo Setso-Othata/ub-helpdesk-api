@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - Pending Requests</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
+  <span class="topbar-user" id="topbar-name"></span>
+  <div class="bell-wrap">
+    <a href="admin-pending.html" class="bell-btn">Alerts</a>
+    <span class="bell-count">2</span>
+  </div>
+  <a href="index.html" class="topbar-logout">Log out</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Overview</div>
+      <a href="admin-dashboard.html" class="sb-link">Dashboard</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Requests</div>
+      <a href="admin-pending.html" class="sb-link active">Pending</a>
+      <a href="admin-approved.html" class="sb-link">Approved</a>
+      <a href="admin-denied.html" class="sb-link">Denied</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Analytics</div>
+      <a href="admin-report.html" class="sb-link">Reports</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Help</div>
+      <a href="admin-faq.html" class="sb-link">FAQs</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="ph">
+      <h2>Pending Requests</h2>
+      <p>2 requests awaiting your review</p>
+    </div>
+
+    <div class="rcard pending">
+      <div class="r-body">
+        <div class="r-title">Extra Credits &mdash; Requesting 21 credits total</div>
+        <div class="r-meta"><strong>Kefilwe Moeti</strong> &nbsp;&middot;&nbsp; UB23050001 &nbsp;&middot;&nbsp; 12 Jan 2026 &nbsp;&middot;&nbsp; REQ0001</div>
+        <div class="r-reason">I am in my final semester and need 3 extra courses to graduate on time. My CGPA is 3.6 and I have no outstanding academic issues.</div>
+      </div>
+      <div class="r-right">
+        <span class="tbadge tbc">Extra Credit Load</span>
+        <span class="sp sp-pending">Pending</span>
+        <div class="admin-acts">
+          <button class="btn-ok">Approve</button>
+          <button class="btn-no">Deny</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rcard pending">
+      <div class="r-body">
+        <div class="r-title">Add Course &mdash; STAT201 Statistics I</div>
+        <div class="r-meta"><strong>Tebogo Kgosi</strong> &nbsp;&middot;&nbsp; UB23050002 &nbsp;&middot;&nbsp; 03 Jan 2026 &nbsp;&middot;&nbsp; REQ0004</div>
+        <div class="r-reason">STAT201 is a required elective for my BBA concentration. My advisor recommended I take it in Semester 2 to complete the analytics track on time.</div>
+      </div>
+      <div class="r-right">
+        <span class="tbadge tba">Add a Course</span>
+        <span class="sp sp-pending">Pending</span>
+        <div class="admin-acts">
+          <button class="btn-ok">Approve</button>
+          <button class="btn-no">Deny</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  var u = requireAdmin();
+  if (u) document.getElementById('topbar-name').textContent = u.name;
+</script>
+</body>
+</html>

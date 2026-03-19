@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Student Help Desk</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ub-navy: #003366;
+    --ub-gold: #C8A84B;
+    --ub-light: #f5f7fa;
+    --ub-white: #ffffff;
+    --ub-gray: #6b7280;
+    --ub-border: #e5e7eb;
+    --ub-green: #059669;
+    --ub-red: #dc2626;
+    --ub-orange: #d97706;
+    --ub-blue-light: #eff6ff;
+    --shadow: 0 4px 24px rgba(0,51,102,0.10);
+    --radius: 14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--ub-light); color:#1a2340; min-height:100vh; }
+
+  /* ========== AUTH SCREEN ========== */
+  #auth-screen {
+    min-height:100vh;
+    background: linear-gradient(135deg, #001a3d 0%, #003366 50%, #00234d 100%);
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+  }
+  #auth-screen::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse at 70% 30%, rgba(200,168,75,0.13) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(200,168,75,0.08) 0%, transparent 50%);
+  }
+  .auth-card {
+    background:rgba(255,255,255,0.97);
+    border-radius:20px;
+    padding:48px 44px;
+    width:100%; max-width:440px;
+    box-shadow:0 24px 80px rgba(0,0,0,0.4);
+    position:relative; z-index:2;
+    animation: fadeUp 0.5s ease;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+  .auth-logo { text-align:center; margin-bottom:28px; }
+  .auth-logo .crest { width:64px; height:64px; background:var(--ub-navy); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px; }
+  .auth-logo .crest span { font-size:24px; color:var(--ub-gold); font-family:'Playfair Display',serif; font-weight:700; }
+  .auth-logo h1 { font-family:'Playfair Display',serif; font-size:22px; color:var(--ub-navy); line-height:1.2; }
+  .auth-logo p { font-size:13px; color:var(--ub-gray); margin-top:4px; }
+  .role-tabs { display:flex; gap:8px; margin-bottom:24px; background:#f0f4f8; border-radius:10px; padding:4px; }
+  .role-tab { flex:1; padding:9px; text-align:center; border-radius:8px; cursor:pointer; font-size:14px; font-weight:500; color:var(--ub-gray); transition:all 0.2s; border:none; background:transparent; }
+  .role-tab.active { background:#fff; color:var(--ub-navy); box-shadow:0 2px 8px rgba(0,0,0,0.10); }
+  .form-group { margin-bottom:18px; }
+  .form-group label { display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; letter-spacing:0.3px; }
+  .form-group input, .form-group select { width:100%; padding:11px 14px; border:1.5px solid var(--ub-border); border-radius:9px; font-size:14px; font-family:inherit; transition:border-color 0.2s; background:#fff; }
+  .form-group input:focus, .form-group select:focus { outline:none; border-color:var(--ub-navy); box-shadow:0 0 0 3px rgba(0,51,102,0.10); }
+  .btn-primary { width:100%; padding:13px; background:var(--ub-navy); color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+  .btn-primary:hover { background:#002655; transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,51,102,0.25); }
+  .demo-hint { margin-top:16px; text-align:center; font-size:12px; color:var(--ub-gray); background:#f9fafb; border-radius:8px; padding:10px; }
+
+  /* ========== APP LAYOUT ========== */
+  #app-screen { display:none; min-height:100vh; }
+  .sidebar {
+    position:fixed; left:0; top:0; bottom:0; width:240px;
+    background:var(--ub-navy);
+    display:flex; flex-direction:column;
+    z-index:100;
+  }
+  .sidebar-brand { padding:24px 20px; border-bottom:1px solid rgba(255,255,255,0.10); }
+  .sidebar-brand .brand-icon { width:36px; height:36px; background:var(--ub-gold); border-radius:8px; display:inline-flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:16px; color:var(--ub-navy); font-weight:700; margin-bottom:8px; }
+  .sidebar-brand h2 { font-family:'Playfair Display',serif; font-size:15px; color:#fff; }
+  .sidebar-brand p { font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px; }
+  .sidebar-user { padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.10); }
+  .sidebar-user .user-avatar { width:38px; height:38px; border-radius:50%; background:var(--ub-gold); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; color:var(--ub-navy); margin-bottom:8px; }
+  .sidebar-user .user-name { font-size:13px; color:#fff; font-weight:600; }
+  .sidebar-user .user-role { font-size:11px; color:rgba(255,255,255,0.5); }
+  .sidebar-nav { flex:1; padding:12px 10px; overflow-y:auto; }
+  .nav-section-label { font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1.2px; padding:8px 10px 4px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px; cursor:pointer; color:rgba(255,255,255,0.7); font-size:13.5px; font-weight:500; margin-bottom:2px; transition:all 0.2s; position:relative; border:none; background:transparent; width:100%; text-align:left; }
+  .nav-item:hover { background:rgba(255,255,255,0.08); color:#fff; }
+  .nav-item.active { background:rgba(200,168,75,0.18); color:var(--ub-gold); }
+  .nav-item .nav-icon { font-size:17px; width:20px; text-align:center; }
+  .nav-badge { background:var(--ub-gold); color:var(--ub-navy); font-size:11px; font-weight:700; border-radius:10px; padding:2px 7px; margin-left:auto; }
+  .sidebar-footer { padding:16px 20px; border-top:1px solid rgba(255,255,255,0.10); }
+  .btn-logout { width:100%; padding:10px; border:1px solid rgba(255,255,255,0.2); border-radius:8px; background:transparent; color:rgba(255,255,255,0.7); font-size:13px; font-family:inherit; cursor:pointer; transition:all 0.2s; }
+  .btn-logout:hover { background:rgba(255,255,255,0.08); color:#fff; }
+
+  /* ========== MAIN CONTENT ========== */
+  .main-content { margin-left:240px; min-height:100vh; padding:32px; }
+  .page-header { margin-bottom:28px; display:flex; align-items:flex-start; justify-content:space-between; }
+  .page-header h1 { font-family:'Playfair Display',serif; font-size:26px; color:var(--ub-navy); }
+  .page-header p { font-size:14px; color:var(--ub-gray); margin-top:4px; }
+  .topbar-right { display:flex; align-items:center; gap:14px; }
+  .bell-btn { position:relative; background:#fff; border:1.5px solid var(--ub-border); border-radius:10px; width:42px; height:42px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; transition:all 0.2s; }
+  .bell-btn:hover { border-color:var(--ub-navy); }
+  .bell-count { position:absolute; top:-6px; right:-6px; background:var(--ub-red); color:#fff; font-size:11px; font-weight:700; border-radius:10px; padding:2px 6px; min-width:18px; text-align:center; }
+
+  /* ========== CARDS ========== */
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:28px; }
+  .stat-card { background:#fff; border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); border-left:4px solid transparent; }
+  .stat-card.pending { border-left-color:var(--ub-orange); }
+  .stat-card.approved { border-left-color:var(--ub-green); }
+  .stat-card.denied { border-left-color:var(--ub-red); }
+  .stat-card.total { border-left-color:var(--ub-navy); }
+  .stat-card .stat-label { font-size:12px; color:var(--ub-gray); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+  .stat-card .stat-number { font-size:32px; font-weight:700; font-family:'Playfair Display',serif; margin-top:4px; }
+  .stat-card.pending .stat-number { color:var(--ub-orange); }
+  .stat-card.approved .stat-number { color:var(--ub-green); }
+  .stat-card.denied .stat-number { color:var(--ub-red); }
+  .stat-card.total .stat-number { color:var(--ub-navy); }
+
+  /* ========== PANELS ========== */
+  .panel { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-bottom:24px; }
+  .panel-header { padding:18px 24px; border-bottom:1px solid var(--ub-border); display:flex; align-items:center; justify-content:space-between; }
+  .panel-header h3 { font-size:16px; font-weight:600; color:var(--ub-navy); }
+  .panel-body { padding:24px; }
+
+  /* ========== REQUEST TABLE ========== */
+  .req-table { width:100%; border-collapse:collapse; font-size:14px; }
+  .req-table th { padding:10px 14px; text-align:left; font-size:12px; font-weight:700; color:var(--ub-gray); text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid var(--ub-border); }
+  .req-table td { padding:14px 14px; border-bottom:1px solid #f3f4f6; vertical-align:middle; }
+  .req-table tr:last-child td { border-bottom:none; }
+  .req-table tr:hover td { background:#fafbfc; }
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+  .badge.pending { background:#fef3c7; color:#92400e; }
+  .badge.approved { background:#d1fae5; color:#065f46; }
+  .badge.denied { background:#fee2e2; color:#991b1b; }
+  .btn-sm { padding:6px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; border:none; font-family:inherit; transition:all 0.2s; }
+  .btn-approve { background:#d1fae5; color:#065f46; }
+  .btn-approve:hover { background:#a7f3d0; }
+  .btn-deny { background:#fee2e2; color:#991b1b; }
+  .btn-deny:hover { background:#fecaca; }
+  .btn-view { background:var(--ub-blue-light); color:var(--ub-navy); }
+
+  /* ========== REQUEST FORM CARDS ========== */
+  .action-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
+  .action-card { background:#fff; border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); cursor:pointer; transition:all 0.2s; border:2px solid transparent; text-align:center; }
+  .action-card:hover { border-color:var(--ub-navy); transform:translateY(-2px); }
+  .action-card.selected { border-color:var(--ub-gold); background:rgba(200,168,75,0.05); }
+  .action-card .ac-icon { font-size:32px; margin-bottom:10px; }
+  .action-card h4 { font-size:14px; font-weight:600; color:var(--ub-navy); }
+  .action-card p { font-size:12px; color:var(--ub-gray); margin-top:4px; }
+
+  /* ========== FORM ========== */
+  .request-form { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:28px; display:none; animation:fadeUp 0.3s ease; }
+  .request-form.visible { display:block; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .form-group textarea { width:100%; padding:11px 14px; border:1.5px solid var(--ub-border); border-radius:9px; font-size:14px; font-family:inherit; resize:vertical; min-height:80px; }
+  .form-group textarea:focus { outline:none; border-color:var(--ub-navy); box-shadow:0 0 0 3px rgba(0,51,102,0.10); }
+  .btn-submit { padding:12px 28px; background:var(--ub-navy); color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.2s; }
+  .btn-submit:hover { background:#002655; }
+  .btn-secondary { padding:12px 20px; background:#f3f4f6; color:#374151; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; margin-right:10px; }
+
+  /* ========== FAQ / RAG ========== */
+  .faq-chat { background:#f9fafb; border-radius:12px; padding:20px; min-height:300px; max-height:400px; overflow-y:auto; margin-bottom:16px; display:flex; flex-direction:column; gap:12px; }
+  .chat-msg { max-width:80%; padding:12px 16px; border-radius:14px; font-size:14px; line-height:1.5; }
+  .chat-msg.user { background:var(--ub-navy); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+  .chat-msg.bot { background:#fff; color:#1a2340; border:1px solid var(--ub-border); align-self:flex-start; border-bottom-left-radius:4px; }
+  .chat-msg.bot .bot-label { font-size:11px; font-weight:700; color:var(--ub-gold); margin-bottom:4px; }
+  .faq-input-row { display:flex; gap:10px; }
+  .faq-input-row input { flex:1; padding:12px 16px; border:1.5px solid var(--ub-border); border-radius:10px; font-size:14px; font-family:inherit; }
+  .faq-input-row input:focus { outline:none; border-color:var(--ub-navy); }
+  .faq-input-row button { padding:12px 20px; background:var(--ub-navy); color:#fff; border:none; border-radius:10px; cursor:pointer; font-size:14px; font-family:inherit; font-weight:600; }
+
+  /* ========== REPORT ========== */
+  .report-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .report-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:24px; }
+  .report-card h3 { font-size:15px; font-weight:600; color:var(--ub-navy); margin-bottom:18px; }
+  .bar-chart { display:flex; flex-direction:column; gap:14px; }
+  .bar-item .bar-label { display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; font-weight:500; }
+  .bar-track { background:#f3f4f6; border-radius:20px; height:10px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:20px; transition:width 1s ease; }
+  .bar-fill.pending { background:var(--ub-orange); }
+  .bar-fill.approved { background:var(--ub-green); }
+  .bar-fill.denied { background:var(--ub-red); }
+  .donut-wrap { display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap; }
+  .donut-svg { width:160px; height:160px; }
+  .donut-legend { display:flex; flex-direction:column; gap:8px; }
+  .legend-item { display:flex; align-items:center; gap:8px; font-size:13px; }
+  .legend-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+  .type-breakdown { margin-top:16px; }
+  .type-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f3f4f6; font-size:14px; }
+  .type-row:last-child { border-bottom:none; }
+  .btn-export { padding:10px 20px; background:var(--ub-gold); color:var(--ub-navy); border:none; border-radius:9px; font-weight:700; cursor:pointer; font-family:inherit; font-size:13px; }
+
+  /* ========== MODAL ========== */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:500; display:none; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:#fff; border-radius:16px; padding:32px; max-width:520px; width:90%; box-shadow:0 24px 60px rgba(0,0,0,0.25); animation:fadeUp 0.25s ease; position:relative; }
+  .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--ub-gray); }
+  .modal h2 { font-family:'Playfair Display',serif; font-size:20px; color:var(--ub-navy); margin-bottom:16px; }
+  .modal-detail-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f3f4f6; font-size:14px; }
+  .modal-detail-row:last-child { border-bottom:none; }
+  .modal-detail-row span:first-child { color:var(--ub-gray); font-weight:500; }
+  .modal-actions { margin-top:20px; display:flex; gap:10px; }
+
+  /* ========== PAGES ========== */
+  .page { display:none; }
+  .page.active { display:block; }
+
+  .empty-state { text-align:center; padding:48px 20px; color:var(--ub-gray); }
+  .empty-state .empty-icon { font-size:48px; margin-bottom:12px; opacity:0.5; }
+  .empty-state p { font-size:14px; }
+
+  .toast { position:fixed; bottom:30px; right:30px; background:var(--ub-navy); color:#fff; padding:14px 22px; border-radius:10px; font-size:14px; font-weight:500; z-index:9999; transform:translateY(80px); opacity:0; transition:all 0.3s; display:flex; align-items:center; gap:10px; }
+  .toast.show { transform:none; opacity:1; }
+  .toast.success { background:var(--ub-green); }
+  .toast.error { background:var(--ub-red); }
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="crest"><span>UB</span></div>
+      <h1>University of Botswana<br>Student Help Desk</h1>
+      <p>Academic Services Portal</p>
+    </div>
+    <div class="role-tabs">
+      <button class="role-tab active" onclick="switchRole('student')">Student</button>
+      <button class="role-tab" onclick="switchRole('admin')">Administrator</button>
+    </div>
+    <div class="form-group">
+      <label>Student / Staff ID</label>
+      <input type="text" id="login-id" placeholder="e.g. 20210001 or ADM001" value="20210001">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="Enter password" value="password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+    <div class="demo-hint">
+      Demo — Student: <strong>20210001</strong> / Admin: <strong>ADM001</strong> · password: <strong>password</strong>
+    </div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="app-screen">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">UB</div>
+      <h2>Help Desk</h2>
+      <p>Academic Services</p>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="s-avatar">S</div>
+      <div class="user-name" id="s-name">Student Name</div>
+      <div class="user-role" id="s-role">Student</div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">⬡ Sign Out</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <!-- STUDENT PAGES -->
+    <div class="page" id="page-dashboard">
+      <div class="page-header">
+        <div><h1>Dashboard</h1><p>Welcome back — manage your academic requests</p></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card total"><div class="stat-label">Total Requests</div><div class="stat-number" id="dash-total">0</div></div>
+        <div class="stat-card pending"><div class="stat-label">Pending</div><div class="stat-number" id="dash-pending">0</div></div>
+        <div class="stat-card approved"><div class="stat-label">Approved</div><div class="stat-number" id="dash-approved">0</div></div>
+        <div class="stat-card denied"><div class="stat-label">Denied</div><div class="stat-number" id="dash-denied">0</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>Recent Requests</h3></div>
+        <div class="panel-body" id="dash-recent"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-new-request">
+      <div class="page-header"><div><h1>New Request</h1><p>Choose the type of academic request you'd like to submit</p></div></div>
+      <div class="action-grid" id="action-grid"></div>
+      <div class="request-form" id="request-form">
+        <h3 id="form-title" style="font-size:17px;font-weight:600;color:var(--ub-navy);margin-bottom:20px;"></h3>
+        <div id="form-fields"></div>
+        <div style="margin-top:20px;">
+          <button class="btn-secondary" onclick="cancelForm()">Cancel</button>
+          <button class="btn-submit" onclick="submitRequest()">Submit Request</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-pending"><div class="page-header"><div><h1>Pending Requests</h1><p>Requests awaiting review</p></div></div><div id="pending-table"></div></div>
+    <div class="page" id="page-approved"><div class="page-header"><div><h1>Approved Requests</h1><p>Successfully approved requests</p></div></div><div id="approved-table"></div></div>
+    <div class="page" id="page-denied"><div class="page-header"><div><h1>Denied Requests</h1><p>Requests that were not approved</p></div></div><div id="denied-table"></div></div>
+
+    <div class="page" id="page-faq">
+      <div class="page-header"><div><h1>FAQ Assistant</h1><p>Ask anything about UB academic policies — powered by AI</p></div></div>
+      <div class="panel">
+        <div class="panel-header"><h3>💬 Chat with UB Academic Assistant</h3></div>
+        <div class="panel-body">
+          <div class="faq-chat" id="faq-chat"></div>
+          <div class="faq-input-row">
+            <input type="text" id="faq-input" placeholder="e.g. How many credits can I take per semester?" onkeydown="if(event.key==='Enter')sendFaq()">
+            <button onclick="sendFaq()">Ask →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN PAGES -->
+    <div class="page" id="page-admin-dashboard">
+      <div class="page-header">
+        <div><h1>Admin Dashboard</h1><p>Overview of all student requests</p></div>
+        <div class="topbar-right">
+          <div class="bell-btn" onclick="showPage('page-admin-pending')">🔔<span class="bell-count" id="bell-count">0</span></div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card total"><div class="stat-label">Total Requests</div><div class="stat-number" id="adm-total">0</div></div>
+        <div class="stat-card pending"><div class="stat-label">Pending</div><div class="stat-number" id="adm-pending">0</div></div>
+        <div class="stat-card approved"><div class="stat-label">Approved</div><div class="stat-number" id="adm-approved">0</div></div>
+        <div class="stat-card denied"><div class="stat-label">Denied</div><div class="stat-number" id="adm-denied">0</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>All Incoming Requests</h3></div>
+        <div class="panel-body" id="adm-recent-table"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-admin-pending">
+      <div class="page-header"><div><h1>Pending Requests</h1><p>Review and action student requests</p></div><div class="topbar-right"><div class="bell-btn">🔔<span class="bell-count" id="bell-count2">0</span></div></div></div>
+      <div id="adm-pending-table"></div>
+    </div>
+    <div class="page" id="page-admin-approved"><div class="page-header"><div><h1>Approved Requests</h1></div></div><div id="adm-approved-table"></div></div>
+    <div class="page" id="page-admin-denied"><div class="page-header"><div><h1>Denied Requests</h1></div></div><div id="adm-denied-table"></div></div>
+    <div class="page" id="page-report">
+      <div class="page-header">
+        <div><h1>Reports</h1><p>Analytics and statistics on academic requests</p></div>
+        <button class="btn-export" onclick="exportReport()">⬇ Export PDF</button>
+      </div>
+      <div id="report-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="modal-title">Request Details</h2>
+    <div id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATA STORE =====
+let currentUser = null;
+let currentRole = 'student';
+
+const USERS = {
+  '20210001': { name:'Kagiso Mokoena', role:'student', program:'BSc Computer Science', year:2, credits:60 },
+  '20210002': { name:'Thabo Sithole', role:'student', program:'BSc Mathematics', year:3, credits:75 },
+  'ADM001': { name:'Dr. Mmopi Kgosi', role:'admin', department:'Academic Registry' },
+};
+
+let requests = [
+  { id:'REQ001', studentId:'20210002', studentName:'Thabo Sithole', type:'Credit Overload', detail:'Request to take 75 credits this semester due to repeating a course.', status:'pending', date:'2025-02-10', seen:false },
+  { id:'REQ002', studentId:'20210002', studentName:'Thabo Sithole', type:'Add Course', detail:'Add CS401 - Artificial Intelligence to current registration.', status:'approved', date:'2025-02-08', seen:true },
+  { id:'REQ003', studentId:'20210001', studentName:'Kagiso Mokoena', type:'Drop Course', detail:'Drop ECON101 - Introduction to Economics.', status:'denied', date:'2025-02-05', seen:true },
+];
+let nextId = 4;
+
+// ===== AUTH =====
+function switchRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.role-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&role==='student')||(i===1&&role==='admin')));
+  document.getElementById('login-id').value = role === 'admin' ? 'ADM001' : '20210001';
+}
+
+function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const user = USERS[id];
+  if (!user || pass !== 'password') { showToast('Invalid credentials', 'error'); return; }
+  currentUser = { id, ...user };
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  setupSidebar();
+  if (user.role === 'admin') { showPage('page-admin-dashboard'); updateAdminStats(); }
+  else { showPage('page-dashboard'); updateStudentStats(); }
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-id').value = '20210001';
+  document.getElementById('login-pass').value = 'password';
+  currentRole = 'student';
+  document.querySelectorAll('.role-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+}
+
+// ===== SIDEBAR =====
+function setupSidebar() {
+  const u = currentUser;
+  document.getElementById('s-avatar').textContent = u.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+  document.getElementById('s-name').textContent = u.name;
+  document.getElementById('s-role').textContent = u.role === 'admin' ? 'Administrator' : `Student · ${u.id}`;
+
+  const nav = document.getElementById('sidebar-nav');
+  const items = u.role === 'student' ? [
+    { label:'OVERVIEW', items:[
+      { icon:'⊞', text:'Dashboard', page:'page-dashboard' },
+    ]},
+    { label:'REQUESTS', items:[
+      { icon:'＋', text:'New Request', page:'page-new-request' },
+      { icon:'⧖', text:'Pending', page:'page-pending' },
+      { icon:'✓', text:'Approved', page:'page-approved' },
+      { icon:'✕', text:'Denied', page:'page-denied' },
+    ]},
+    { label:'SUPPORT', items:[
+      { icon:'❓', text:'FAQ Assistant', page:'page-faq' },
+    ]},
+  ] : [
+    { label:'OVERVIEW', items:[
+      { icon:'⊞', text:'Dashboard', page:'page-admin-dashboard' },
+    ]},
+    { label:'REQUESTS', items:[
+      { icon:'⧖', text:'Pending', page:'page-admin-pending', badge:true },
+      { icon:'✓', text:'Approved', page:'page-admin-approved' },
+      { icon:'✕', text:'Denied', page:'page-admin-denied' },
+    ]},
+    { label:'ANALYTICS', items:[
+      { icon:'📊', text:'Reports', page:'page-report' },
+    ]},
+  ];
+
+  nav.innerHTML = '';
+  items.forEach(section => {
+    nav.innerHTML += `<div class="nav-section-label">${section.label}</div>`;
+    section.items.forEach(item => {
+      const badge = item.badge ? `<span class="nav-badge" id="nav-badge">${getPendingCount()}</span>` : '';
+      nav.innerHTML += `<button class="nav-item" onclick="showPage('${item.page}')" data-page="${item.page}"><span class="nav-icon">${item.icon}</span>${item.text}${badge}</button>`;
+    });
+  });
+}
+
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById(pageId);
+  if (page) page.classList.add('active');
+  document.querySelectorAll(`[data-page="${pageId}"]`).forEach(n => n.classList.add('active'));
+
+  if (pageId==='page-dashboard') updateStudentStats();
+  else if (pageId==='page-pending') renderFilteredTable('pending-table','pending',false);
+  else if (pageId==='page-approved') renderFilteredTable('approved-table','approved',false);
+  else if (pageId==='page-denied') renderFilteredTable('denied-table','denied',false);
+  else if (pageId==='page-new-request') renderActionGrid();
+  else if (pageId==='page-faq') initFaq();
+  else if (pageId==='page-admin-dashboard') updateAdminStats();
+  else if (pageId==='page-admin-pending') renderFilteredTable('adm-pending-table','pending',true);
+  else if (pageId==='page-admin-approved') renderFilteredTable('adm-approved-table','approved',true);
+  else if (pageId==='page-admin-denied') renderFilteredTable('adm-denied-table','denied',true);
+  else if (pageId==='page-report') renderReport();
+}
+
+// ===== STATS =====
+function myRequests() { return requests.filter(r => r.studentId === currentUser.id); }
+function getPendingCount() { return requests.filter(r=>r.status==='pending').length; }
+
+function updateStudentStats() {
+  const mine = myRequests();
+  document.getElementById('dash-total').textContent = mine.length;
+  document.getElementById('dash-pending').textContent = mine.filter(r=>r.status==='pending').length;
+  document.getElementById('dash-approved').textContent = mine.filter(r=>r.status==='approved').length;
+  document.getElementById('dash-denied').textContent = mine.filter(r=>r.status==='denied').length;
+  renderRecentStudentTable();
+}
+
+function updateAdminStats() {
+  const pending = requests.filter(r=>r.status==='pending').length;
+  document.getElementById('adm-total').textContent = requests.length;
+  document.getElementById('adm-pending').textContent = pending;
+  document.getElementById('adm-approved').textContent = requests.filter(r=>r.status==='approved').length;
+  document.getElementById('adm-denied').textContent = requests.filter(r=>r.status==='denied').length;
+  const bc = document.getElementById('bell-count');
+  const bc2 = document.getElementById('bell-count2');
+  const nb = document.getElementById('nav-badge');
+  if(bc) bc.textContent = pending;
+  if(bc2) bc2.textContent = pending;
+  if(nb) nb.textContent = pending;
+  renderAdminAllTable();
+}
+
+// ===== TABLES =====
+function statusBadge(s) {
+  const icons = {pending:'⧖',approved:'✓',denied:'✕'};
+  return `<span class="badge ${s}">${icons[s]||''} ${s.charAt(0).toUpperCase()+s.slice(1)}</span>`;
+}
+
+function renderRecentStudentTable() {
+  const mine = myRequests().slice(-5).reverse();
+  const el = document.getElementById('dash-recent');
+  if (!mine.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No requests yet. Submit your first request!</p></div>`; return; }
+  el.innerHTML = tableHTML(mine, false);
+}
+
+function renderAdminAllTable() {
+  const el = document.getElementById('adm-recent-table');
+  if (!requests.length) { el.innerHTML = emptyHTML(); return; }
+  el.innerHTML = tableHTML(requests.slice().reverse(), true);
+}
+
+function renderFilteredTable(elId, status, isAdmin) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const filtered = isAdmin
+    ? requests.filter(r=>r.status===status)
+    : myRequests().filter(r=>r.status===status);
+  if (!filtered.length) { el.innerHTML = `<div class="panel"><div class="panel-body">${emptyHTML()}</div></div>`; return; }
+  el.innerHTML = `<div class="panel"><div class="panel-body">${tableHTML(filtered.slice().reverse(), isAdmin)}</div></div>`;
+}
+
+function tableHTML(rows, isAdmin) {
+  let h = `<table class="req-table"><thead><tr>
+    <th>ID</th>${isAdmin?'<th>Student</th>':''}
+    <th>Type</th><th>Date</th><th>Status</th><th>Action</th>
+  </tr></thead><tbody>`;
+  rows.forEach(r => {
+    const actions = isAdmin && r.status==='pending'
+      ? `<button class="btn-sm btn-approve" onclick="actionRequest('${r.id}','approved')">Approve</button>
+         <button class="btn-sm btn-deny" style="margin-left:6px" onclick="actionRequest('${r.id}','denied')">Deny</button>`
+      : `<button class="btn-sm btn-view" onclick="viewRequest('${r.id}')">View</button>`;
+    h += `<tr>
+      <td><strong>${r.id}</strong></td>
+      ${isAdmin?`<td>${r.studentName}</td>`:''}
+      <td>${r.type}</td>
+      <td>${r.date}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${actions}</td>
+    </tr>`;
+  });
+  return h + '</tbody></table>';
+}
+
+function emptyHTML() {
+  return `<div class="empty-state"><div class="empty-icon">🗂️</div><p>No requests in this category.</p></div>`;
+}
+
+// ===== VIEW / ACTION MODAL =====
+function viewRequest(id) {
+  const r = requests.find(x=>x.id===id);
+  if (!r) return;
+  document.getElementById('modal-title').textContent = r.type;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-detail-row"><span>Request ID</span><strong>${r.id}</strong></div>
+    <div class="modal-detail-row"><span>Student</span><strong>${r.studentName}</strong></div>
+    <div class="modal-detail-row"><span>Type</span><strong>${r.type}</strong></div>
+    <div class="modal-detail-row"><span>Date</span><strong>${r.date}</strong></div>
+    <div class="modal-detail-row"><span>Status</span>${statusBadge(r.status)}</div>
+    <div class="modal-detail-row"><span>Details</span><span style="max-width:280px;text-align:right">${r.detail}</span></div>
+  `;
+  const ma = document.getElementById('modal-actions');
+  if (currentUser.role==='admin' && r.status==='pending') {
+    ma.innerHTML = `
+      <button class="btn-sm btn-approve" style="padding:10px 18px" onclick="actionRequest('${r.id}','approved');closeModal()">✓ Approve</button>
+      <button class="btn-sm btn-deny" style="padding:10px 18px" onclick="actionRequest('${r.id}','denied');closeModal()">✕ Deny</button>`;
+  } else { ma.innerHTML = ''; }
+  document.getElementById('modal').classList.add('open');
+}
+
+function actionRequest(id, status) {
+  const r = requests.find(x=>x.id===id);
+  if (!r) return;
+  r.status = status;
+  r.seen = true;
+  showToast(`Request ${id} ${status}!`, status==='approved'?'success':'error');
+  const active = document.querySelector('.page.active');
+  if (active) showPage(active.id);
+  updateAdminStats();
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+// ===== NEW REQUEST =====
+const REQUEST_TYPES = [
+  { icon:'📚', title:'Credit Overload', desc:'Request more than allocated credits', fields:['desired_credits','reason'] },
+  { icon:'➕', title:'Add Course', desc:'Add a course to your registration', fields:['course_code','course_name','reason'] },
+  { icon:'➖', title:'Drop Course', desc:'Drop a registered course', fields:['course_code','course_name','reason'] },
+  { icon:'🔄', title:'Change Program', desc:'Transfer to a different program', fields:['current_program','desired_program','reason'] },
+];
+
+let selectedType = null;
+
+function renderActionGrid() {
+  document.getElementById('action-grid').innerHTML = REQUEST_TYPES.map((t,i) => `
+    <div class="action-card" onclick="selectType(${i})" id="ac-${i}">
+      <div class="ac-icon">${t.icon}</div>
+      <h4>${t.title}</h4>
+      <p>${t.desc}</p>
+    </div>
+  `).join('');
+  document.getElementById('request-form').classList.remove('visible');
+  selectedType = null;
+}
+
+function selectType(i) {
+  selectedType = REQUEST_TYPES[i];
+  document.querySelectorAll('.action-card').forEach((c,j)=>c.classList.toggle('selected',j===i));
+  const formTitles = { desired_credits:'Desired Credits', course_code:'Course Code', course_name:'Course Name', current_program:'Current Program', desired_program:'Desired Program', reason:'Reason / Justification' };
+  const fieldTypes = { reason:'textarea' };
+  document.getElementById('form-title').textContent = `${selectedType.icon} ${selectedType.title} Request`;
+  document.getElementById('form-fields').innerHTML = selectedType.fields.map(f => `
+    <div class="form-group" style="margin-bottom:16px">
+      <label>${formTitles[f]||f}</label>
+      ${fieldTypes[f]==='textarea'
+        ? `<textarea id="field-${f}" placeholder="Provide details..."></textarea>`
+        : `<input type="text" id="field-${f}" placeholder="${formTitles[f]||f}">`}
+    </div>
+  `).join('');
+  document.getElementById('request-form').classList.add('visible');
+}
+
+function cancelForm() {
+  selectedType = null;
+  document.getElementById('request-form').classList.remove('visible');
+  document.querySelectorAll('.action-card').forEach(c=>c.classList.remove('selected'));
+}
+
+function submitRequest() {
+  if (!selectedType) return;
+  const details = selectedType.fields.map(f => {
+    const el = document.getElementById('field-'+f);
+    return el ? `${f}: ${el.value}` : '';
+  }).filter(Boolean).join(' | ');
+
+  const newReq = {
+    id: `REQ${String(nextId++).padStart(3,'0')}`,
+    studentId: currentUser.id,
+    studentName: currentUser.name,
+    type: selectedType.title,
+    detail: details || 'No details provided.',
+    status: 'pending',
+    date: new Date().toISOString().split('T')[0],
+    seen: false,
+  };
+  requests.push(newReq);
+  showToast(`Request ${newReq.id} submitted successfully!`, 'success');
+  cancelForm();
+  updateStudentStats();
+}
+
+// ===== FAQ / RAG =====
+const FAQ_KB = {
+  credits: { keywords:['credit','credits','load','overload','maximum','minimum'], answer:`The standard credit load at UB is <strong>60 credits per semester</strong>. Students may apply for a credit overload (up to 75 credits) by submitting a formal request through this portal. Approval is based on your CGPA (minimum 3.0 required) and faculty consent.` },
+  add: { keywords:['add','adding','register','registration','enroll','enrolment'], answer:`Course additions are permitted during the <strong>first two weeks</strong> of the semester. Submit an Add Course request via the portal with the course code and justification. The Academic Registry processes requests within 3–5 business days.` },
+  drop: { keywords:['drop','dropping','withdraw','withdrawal','remove'], answer:`You may drop a course without academic penalty within the <strong>first four weeks</strong> of semester. After this period, a "W" grade will appear on your transcript. Some courses require departmental approval to drop.` },
+  program: { keywords:['program','programme','change','transfer','faculty','department','switch'], answer:`Program change requests must be submitted before the <strong>end of the first month</strong> of the academic year. Requirements include: minimum CGPA of 2.5, faculty approval, and availability of space in the target program. Contact your current faculty advisor first.` },
+  fees: { keywords:['fee','fees','payment','tuition','bursary','scholarship'], answer:`UB tuition fees vary by faculty and program. Fee schedules are published each academic year. Students experiencing financial difficulty may approach the <strong>Student Financial Aid Office</strong> at Block 228 or call +267 355 0000.` },
+  exam: { keywords:['exam','examination','supplementary','special','deferral','defer'], answer:`Supplementary examinations are offered to students who fail with 40–49%. Special examinations (due to illness/bereavement) must be applied for within <strong>3 working days</strong> of the missed exam, accompanied by relevant documentation.` },
+  cgpa: { keywords:['cgpa','gpa','grade','grades','transcript','result'], answer:`Your CGPA is computed from all courses taken at UB. A minimum CGPA of <strong>2.0</strong> is required for good academic standing. CGPAs below 2.0 may result in academic probation. Transcripts can be requested at the Registry office.` },
+  contact: { keywords:['contact','email','phone','office','registry','where'], answer:`The Academic Registry is located in the <strong>Administration Building, Block 130</strong>. Office hours: Mon–Fri, 08:00–16:30. Email: registry@ub.bw | Tel: +267 355 0000.` },
+};
+
+let faqInitialized = false;
+function initFaq() {
+  if (faqInitialized) return;
+  faqInitialized = true;
+  const chat = document.getElementById('faq-chat');
+  chat.innerHTML = `<div class="chat-msg bot"><div class="bot-label">🤖 UB Academic Assistant</div>Hello ${currentUser.name}! I can answer questions about UB policies — credits, course registration, program changes, exams, fees, and more. How can I help you today?</div>`;
+}
+
+function sendFaq() {
+  const input = document.getElementById('faq-input');
+  const q = input.value.trim();
+  if (!q) return;
+  const chat = document.getElementById('faq-chat');
+  chat.innerHTML += `<div class="chat-msg user">${q}</div>`;
+  input.value = '';
+  chat.scrollTop = chat.scrollHeight;
+
+  setTimeout(() => {
+    const answer = getRAGAnswer(q.toLowerCase());
+    chat.innerHTML += `<div class="chat-msg bot"><div class="bot-label">🤖 UB Academic Assistant</div>${answer}</div>`;
+    chat.scrollTop = chat.scrollHeight;
+  }, 600);
+}
+
+function getRAGAnswer(q) {
+  let best = null, bestScore = 0;
+  Object.values(FAQ_KB).forEach(entry => {
+    const score = entry.keywords.filter(k => q.includes(k)).length;
+    if (score > bestScore) { bestScore = score; best = entry; }
+  });
+  if (best && bestScore > 0) return best.answer;
+  return `I'm not sure about that specific topic. For personalized assistance, please contact the <strong>Academic Registry</strong> at registry@ub.bw or visit Block 130 during office hours (Mon–Fri, 08:00–16:30). You can also submit a formal request through the portal.`;
+}
+
+// ===== REPORT =====
+function renderReport() {
+  const total = requests.length;
+  const pending = requests.filter(r=>r.status==='pending').length;
+  const approved = requests.filter(r=>r.status==='approved').length;
+  const denied = requests.filter(r=>r.status==='denied').length;
+  const pct = (n) => total ? Math.round(n/total*100) : 0;
+
+  const byType = {};
+  requests.forEach(r => { byType[r.type] = (byType[r.type]||0)+1; });
+
+  // Build donut SVG
+  const colors = ['#059669','#d97706','#dc2626'];
+  const vals = [approved, pending, denied];
+  const labels = ['Approved','Pending','Denied'];
+  let offset = 0;
+  let paths = '';
+  vals.forEach((v,i) => {
+    const frac = total ? v/total : 0;
+    const [sx,sy,ex,ey,la] = donutArc(offset, frac);
+    if(frac > 0) {
+      paths += `<path d="M 80 80 L ${sx} ${sy} A 60 60 0 ${la} 1 ${ex} ${ey} Z" fill="${colors[i]}" opacity="0.9"/>`;
+    }
+    offset += frac;
+  });
+
+  document.getElementById('report-content').innerHTML = `
+    <div class="report-grid">
+      <div class="report-card">
+        <h3>Request Distribution</h3>
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 160 160">${paths}
+            <circle cx="80" cy="80" r="38" fill="white"/>
+            <text x="80" y="76" text-anchor="middle" font-size="22" font-weight="700" fill="#003366" font-family="Playfair Display,serif">${total}</text>
+            <text x="80" y="93" text-anchor="middle" font-size="10" fill="#6b7280" font-family="DM Sans,sans-serif">TOTAL</text>
+          </svg>
+          <div class="donut-legend">
+            ${labels.map((l,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${colors[i]}"></div><span><strong>${vals[i]}</strong> ${l} (${pct(vals[i])}%)</span></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="report-card">
+        <h3>Status Breakdown</h3>
+        <div class="bar-chart">
+          ${[['Approved',approved,'approved'],['Pending',pending,'pending'],['Denied',denied,'denied']].map(([l,n,c])=>`
+            <div class="bar-item">
+              <div class="bar-label"><span>${l}</span><span>${n} (${pct(n)}%)</span></div>
+              <div class="bar-track"><div class="bar-fill ${c}" style="width:${pct(n)}%"></div></div>
+            </div>`).join('')}
+        </div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f3f4f6;">
+          <p style="font-size:13px;color:var(--ub-gray);">Total requests processed: <strong>${total}</strong></p>
+        </div>
+      </div>
+      <div class="report-card" style="grid-column:1/-1">
+        <h3>Requests by Type</h3>
+        <div class="type-breakdown">
+          ${Object.entries(byType).map(([type,count])=>`
+            <div class="type-row">
+              <span>${type}</span>
+              <span style="display:flex;align-items:center;gap:12px">
+                <span style="font-size:12px;color:var(--ub-gray)">${pct(count)}%</span>
+                <strong>${count}</strong>
+              </span>
+            </div>`).join('')}
+          ${Object.keys(byType).length===0?'<p style="color:var(--ub-gray);font-size:14px">No data available.</p>':''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function donutArc(startFrac, frac) {
+  const cx=80,cy=80,r=60;
+  const startAngle = startFrac * 2*Math.PI - Math.PI/2;
+  const endAngle = (startFrac+frac) * 2*Math.PI - Math.PI/2;
+  const sx = cx + r*Math.cos(startAngle);
+  const sy = cy + r*Math.sin(startAngle);
+  const ex = cx + r*Math.cos(endAngle);
+  const ey = cy + r*Math.sin(endAngle);
+  const la = frac > 0.5 ? 1 : 0;
+  return [sx.toFixed(2),sy.toFixed(2),ex.toFixed(2),ey.toFixed(2),la];
+}
+
+function exportReport() {
+  showToast('Report exported! (Demo — PDF generation requires server)', 'success');
+}
+
+// ===== TOAST =====
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = (type==='success'?'✓ ':type==='error'?'✕ ':'')+msg;
+  t.className = `toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', function(e){if(e.target===this)closeModal();});
+</script>
+</body>
+</html>

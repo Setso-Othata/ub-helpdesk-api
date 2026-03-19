@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Student Help Desk</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy: #0a1628;
+  --navy2: #132040;
+  --gold: #c9a227;
+  --cream: #faf7f2;
+  --white: #ffffff;
+  --g100: #f4f4f6;
+  --g200: #e8e8ec;
+  --g300: #d0d0da;
+  --g400: #9a9aac;
+  --g600: #5a5a72;
+  --green: #1a7a4a;
+  --green-l: #e8f5ee;
+  --green-m: #b2dfcb;
+  --red: #c0392b;
+  --red-l: #fdecea;
+  --red-m: #f5c6c0;
+  --amber: #e67e22;
+  --amber-l: #fef3e2;
+  --amber-m: #fad7a0;
+  --blue: #1a5276;
+  --blue-l: #eaf0f8;
+  --blue-m: #aac4df;
+  --purple-l: #f3eafd;
+  --s1: 0 2px 8px rgba(10,22,40,.08);
+  --s2: 0 8px 24px rgba(10,22,40,.13);
+  --s3: 0 20px 60px rgba(10,22,40,.2);
+  --r: 10px;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  background: var(--cream);
+  color: var(--navy);
+  min-height: 100vh;
+}
+
+/* ── TOPBAR ─────────────────────────────── */
+.topbar {
+  background: var(--navy);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 16px;
+}
+.topbar-title {
+  color: var(--gold);
+  font-size: 16px;
+  font-weight: bold;
+  flex: 1;
+}
+.topbar-user {
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+}
+.topbar-logout {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.75);
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.topbar-logout:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.bell-wrap { position: relative; display: flex; align-items: center; gap: 6px; }
+.bell-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--gold);
+}
+.bell-count {
+  background: #e74c3c;
+  color: #fff;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* ── LAYOUT ─────────────────────────────── */
+.layout {
+  display: flex;
+  min-height: calc(100vh - 56px);
+}
+.sidebar {
+  width: 220px;
+  background: var(--white);
+  border-right: 1px solid var(--g200);
+  padding: 18px 0;
+  flex-shrink: 0;
+}
+.sb-section { padding: 0 12px; margin-bottom: 20px; }
+.sb-label {
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--g400);
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+.sb-link {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--g600);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.sb-link:hover { background: var(--g100); color: var(--navy); }
+.sb-link.active { background: var(--navy); color: var(--gold); font-weight: bold; }
+
+.main { flex: 1; padding: 28px 30px; }
+
+/* ── PAGE HEADER ─────────────────────────── */
+.ph { margin-bottom: 22px; }
+.ph h2 { font-size: 22px; font-weight: bold; color: var(--navy); }
+.ph p { color: var(--g400); font-size: 13px; margin-top: 4px; }
+
+/* ── CARDS ───────────────────────────────── */
+.card {
+  background: var(--white);
+  border-radius: var(--r);
+  padding: 22px;
+  border: 1px solid var(--g200);
+  box-shadow: var(--s1);
+  margin-bottom: 18px;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--navy);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--g200);
+}
+
+/* ── STATS ROW ───────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--g200);
+  border-radius: var(--r);
+  padding: 18px;
+  box-shadow: var(--s1);
+}
+.stat-val {
+  font-size: 26px;
+  font-weight: bold;
+  color: var(--navy);
+  line-height: 1;
+}
+.stat-lbl { font-size: 12px; color: var(--g400); margin-top: 4px; }
+.stat-sub { font-size: 11px; margin-top: 5px; font-weight: bold; }
+
+/* ── TWO COLUMN ──────────────────────────── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+/* ── INFO BOXES ──────────────────────────── */
+.ibox {
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  line-height: 1.55;
+}
+.ibox.info { background: var(--blue-l); border: 1px solid var(--blue-m); color: var(--blue); }
+.ibox.warn { background: var(--amber-l); border: 1px solid var(--amber-m); color: var(--amber); }
+.ibox.ok   { background: var(--green-l); border: 1px solid var(--green-m); color: var(--green); }
+.ibox.err  { background: var(--red-l);   border: 1px solid var(--red-m);   color: var(--red); }
+.ibox:last-child { margin-bottom: 0; }
+
+/* ── SERVICE TILES ───────────────────────── */
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+}
+.service-tile {
+  background: var(--white);
+  border: 1.5px solid var(--g200);
+  border-radius: var(--r);
+  padding: 18px 16px;
+  text-decoration: none;
+  color: var(--navy);
+  display: block;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  border-top: 3px solid var(--g300);
+}
+.service-tile.blue  { border-top-color: #1a56db; }
+.service-tile.green { border-top-color: var(--green); }
+.service-tile.red   { border-top-color: var(--red); }
+.service-tile.amber { border-top-color: var(--amber); }
+.service-tile:hover { box-shadow: var(--s2); border-color: var(--g300); }
+.st-title { font-size: 14px; font-weight: bold; color: var(--navy); margin-bottom: 6px; }
+.st-desc  { font-size: 12px; color: var(--g600); line-height: 1.5; margin-bottom: 8px; }
+.st-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+}
+.tag-blue  { background: #e8f0fe; color: #1a56db; }
+.tag-green { background: var(--green-l); color: var(--green); }
+.tag-red   { background: var(--red-l);   color: var(--red); }
+.tag-amber { background: var(--amber-l); color: var(--amber); }
+
+/* ── REQUEST CARDS ───────────────────────── */
+.rcard {
+  background: var(--white);
+  border: 1px solid var(--g200);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  box-shadow: var(--s1);
+  border-left: 4px solid var(--g300);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.rcard.pending  { border-left-color: var(--amber); }
+.rcard.approved { border-left-color: var(--green); }
+.rcard.denied   { border-left-color: var(--red); }
+.r-body { flex: 1; min-width: 0; }
+.r-title { font-weight: bold; font-size: 14px; color: var(--navy); margin-bottom: 3px; }
+.r-meta { font-size: 12px; color: var(--g400); margin-bottom: 6px; }
+.r-reason {
+  font-size: 12.5px;
+  color: var(--g600);
+  background: var(--g100);
+  padding: 7px 10px;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+.r-note {
+  font-size: 12.5px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  line-height: 1.5;
+  margin-top: 6px;
+  border-left: 3px solid;
+}
+.r-note.ok  { background: var(--green-l); color: var(--green); border-color: var(--green); }
+.r-note.err { background: var(--red-l);   color: var(--red);   border-color: var(--red); }
+.r-right { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; flex-shrink: 0; }
+.tbadge {
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.tbc { background: #e8f0fe; color: #1a56db; }
+.tba { background: var(--green-l); color: var(--green); }
+.tbd { background: var(--red-l);   color: var(--red); }
+.tbp { background: var(--amber-l); color: var(--amber); }
+.sp {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.sp-pending  { background: var(--amber-l); color: var(--amber); }
+.sp-approved { background: var(--green-l); color: var(--green); }
+.sp-denied   { background: var(--red-l);   color: var(--red); }
+
+/* Admin action buttons - display only */
+.admin-acts { display: flex; gap: 6px; margin-top: 4px; }
+.btn-ok {
+  padding: 5px 12px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+.btn-no {
+  padding: 5px 12px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+.by-note { font-size: 11px; color: var(--g400); font-style: italic; text-align: right; line-height: 1.4; }
+
+/* ── FAQ ─────────────────────────────────── */
+.faq-cat {
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--g400);
+  margin: 18px 0 8px;
+}
+.faq-cat:first-child { margin-top: 0; }
+.faq-item {
+  border: 1px solid var(--g200);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.faq-q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: bold;
+  color: var(--navy);
+  background: var(--white);
+  user-select: none;
+  gap: 10px;
+}
+.faq-q:hover { background: var(--g100); }
+.faq-chevron { font-size: 11px; color: var(--g400); flex-shrink: 0; transition: transform 0.2s; }
+.faq-item.open .faq-chevron { transform: rotate(180deg); }
+.faq-a {
+  display: none;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--g600);
+  line-height: 1.7;
+  border-top: 1px solid var(--g200);
+  background: var(--g100);
+}
+.faq-item.open .faq-a { display: block; }
+
+/* ── REPORT ──────────────────────────────── */
+.rep-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.bar-label { width: 140px; font-size: 12.5px; color: var(--navy); flex-shrink: 0; line-height: 1.3; }
+.bar-sub { font-size: 11px; color: var(--g400); display: block; }
+.bar-track { flex: 1; height: 22px; background: var(--g100); border-radius: 20px; overflow: hidden; }
+.bar-fill {
+  height: 100%;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+}
+.bar-pct { font-size: 13px; font-weight: bold; color: var(--g600); width: 36px; text-align: right; flex-shrink: 0; }
+.dnut-wrap { display: flex; justify-content: center; align-items: center; gap: 24px; flex-wrap: wrap; padding: 8px 0; }
+.dnut-leg { display: flex; flex-direction: column; gap: 12px; }
+.leg-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.leg-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.leg-val { font-weight: bold; color: var(--navy); }
+.rep-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rep-tbl th {
+  text-align: left;
+  padding: 9px 12px;
+  background: var(--g100);
+  color: var(--g600);
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.rep-tbl td { padding: 11px 12px; border-bottom: 1px solid var(--g200); }
+.rep-tbl tr:last-child td { border-bottom: none; }
+.rep-tbl tr:hover td { background: var(--g100); }
+.print-btn {
+  padding: 9px 18px;
+  background: var(--white);
+  color: var(--navy);
+  border: 1.5px solid var(--g200);
+  border-radius: 7px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.print-btn:hover { background: var(--g100); }
+
+/* ── SERVICE DETAIL ──────────────────────── */
+.step-list { display: flex; flex-direction: column; gap: 0; }
+.step-row { display: flex; gap: 12px; padding-bottom: 16px; position: relative; }
+.step-row:last-child { padding-bottom: 0; }
+.step-row:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 14px; top: 30px; bottom: 0;
+  width: 2px;
+  background: var(--g200);
+}
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--blue-l);
+  color: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.step-text { font-size: 13.5px; color: var(--navy); line-height: 1.5; padding-top: 4px; }
+.req-list-items { display: flex; flex-direction: column; gap: 8px; }
+.req-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: var(--g100);
+  border-radius: 7px;
+}
+.req-num {
+  width: 20px; height: 20px;
+  background: var(--navy);
+  color: var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.req-text { font-size: 13px; color: var(--navy); line-height: 1.5; }
+
+/* ── EMPTY STATE ─────────────────────────── */
+.empty { text-align: center; padding: 50px 20px; }
+.empty h3 { font-size: 17px; color: var(--g600); margin-bottom: 6px; }
+.empty p { font-size: 13px; color: var(--g400); max-width: 300px; margin: 0 auto; line-height: 1.6; }
+
+/* ── LOGIN PAGE ──────────────────────────── */
+#loginPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy);
+}
+.login-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 44px 48px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--s3);
+}
+.login-org { font-size: 18px; font-weight: bold; color: var(--navy); margin-bottom: 4px; }
+.login-sub { font-size: 12px; color: var(--g400); margin-bottom: 28px; }
+.login-heading { font-size: 24px; font-weight: bold; color: var(--navy); margin-bottom: 6px; }
+.login-desc { font-size: 13px; color: var(--g400); margin-bottom: 24px; }
+.role-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: var(--g100);
+  padding: 4px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+.rtab {
+  padding: 9px;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: bold;
+  color: var(--g600);
+  border: none;
+  background: transparent;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.rtab.active { background: var(--navy); color: var(--gold); }
+.fg { margin-bottom: 16px; }
+.fg label {
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--g600);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.fg input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--g200);
+  border-radius: 8px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  color: var(--navy);
+  outline: none;
+  background: var(--white);
+}
+.fg input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,162,39,.1); }
+.btn-login {
+  width: 100%;
+  padding: 13px;
+  background: var(--navy);
+  color: var(--gold);
+  border: none;
+  border-radius: 8px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 6px;
+}
+.btn-login:hover { background: var(--navy2); }
+.login-hint {
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: var(--g100);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--g600);
+  line-height: 1.7;
+}
+.login-hint strong { color: var(--navy); }
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .two-col, .rep-grid { grid-template-columns: 1fr; }
+  .main { padding: 16px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .login-card { padding: 28px 20px; margin: 14px; }
+  .service-grid { grid-template-columns: 1fr 1fr; }
+}
+@media print {
+  .topbar, .sidebar { display: none !important; }
+  .main { padding: 0; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     LOGIN PAGE
+════════════════════════════════════ -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-org">University of Botswana</div>
+    <div class="login-sub">Student Affairs Help Desk</div>
+    <div class="login-heading">Welcome Back</div>
+    <div class="login-desc">Sign in to access the student help desk portal</div>
+
+    <div class="role-tabs">
+      <button class="rtab active" onclick="setRole(this,'student')">Student</button>
+      <button class="rtab" onclick="setRole(this,'admin')">Administrator</button>
+    </div>
+
+    <div class="fg">
+      <label>Student / Staff ID</label>
+      <input type="text" id="loginId" placeholder="e.g. UB23050001 or ADM001">
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <input type="password" id="loginPw" placeholder="Enter your password">
+    </div>
+
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+
+    <div class="login-hint">
+      <strong>Demo Credentials</strong><br>
+      Student: <strong>UB23050001</strong> / <strong>student123</strong><br>
+      Admin: &nbsp;<strong>ADM001</strong> / <strong>admin123</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     APP SHELL (hidden until login)
+════════════════════════════════════ -->
+<div id="appShell" style="display:none;">
+
+  <!-- STUDENT SHELL -->
+  <div id="studentShell" style="display:none;">
+    <div class="topbar">
+      <div class="topbar-title">University of Botswana — Student Help Desk</div>
+      <span class="topbar-user" id="studentName"></span>
+      <a href="#" class="topbar-logout" onclick="doLogout()">Log out</a>
+    </div>
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sb-section">
+          <div class="sb-label">Overview</div>
+          <a href="#" class="sb-link active" onclick="showPage('s-dashboard', this)">Dashboard</a>
+        </div>
+        <div class="sb-section">
+          <div class="sb-label">Submit Request</div>
+          <a href="#" class="sb-link" onclick="showPage('s-credits', this)">Extra Credits</a>
+          <a href="#" class="sb-link" onclick="showPage('s-addcourse', this)">Add a Course</a>
+          <a href="#" class="sb-link" onclick="showPage('s-dropcourse', this)">Drop a Course</a>
+          <a href="#" class="sb-link" onclick="showPage('s-program', this)">Change Program</a>
+        </div>
+        <div class="sb-section">
+          <div class="sb-label">My Requests</div>
+          <a href="#" class="sb-link" onclick="showPage('s-pending', this)">Pending</a>
+          <a href="#" class="sb-link" onclick="showPage('s-approved', this)">Approved</a>
+          <a href="#" class="sb-link" onclick="showPage('s-denied', this)">Denied</a>
+        </div>
+        <div class="sb-section">
+          <div class="sb-label">Help</div>
+          <a href="#" class="sb-link" onclick="showPage('s-faq', this)">FAQs</a>
+        </div>
+      </div>
+      <div class="main">
+
+        <!-- ── STUDENT DASHBOARD ──────────── -->
+        <div id="s-dashboard" class="s-page">
+          <div class="ph">
+            <h2 id="s-dash-greeting">Good day</h2>
+            <p>University of Botswana — Student Affairs Help Desk Portal</p>
+          </div>
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-val">18</div>
+              <div class="stat-lbl">Current Credits</div>
+              <div class="stat-sub" style="color:var(--g400)">Standard allocation: 18</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val">2</div>
+              <div class="stat-lbl">Pending Requests</div>
+              <div class="stat-sub" style="color:var(--amber)">Awaiting review</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val">2</div>
+              <div class="stat-lbl">Approved</div>
+              <div class="stat-sub" style="color:var(--green)">67% approval rate</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val">1</div>
+              <div class="stat-lbl">Denied</div>
+              <div class="stat-sub" style="color:var(--g400)">5 total submitted</div>
+            </div>
+          </div>
+          <div class="two-col">
+            <div>
+              <div class="card">
+                <div class="card-title">Available Services</div>
+                <div class="service-grid" style="grid-template-columns: 1fr 1fr;">
+                  <a href="#" class="service-tile blue" onclick="showPage('s-credits', null)">
+                    <div class="st-title">Extra Credits</div>
+                    <div class="st-desc">Request to carry more than 18 credits this semester.</div>
+                    <span class="st-tag tag-blue">Academic</span>
+                  </a>
+                  <a href="#" class="service-tile green" onclick="showPage('s-addcourse', null)">
+                    <div class="st-title">Add a Course</div>
+                    <div class="st-desc">Register for an additional course outside your enrolment.</div>
+                    <span class="st-tag tag-green">Registration</span>
+                  </a>
+                  <a href="#" class="service-tile red" onclick="showPage('s-dropcourse', null)">
+                    <div class="st-title">Drop a Course</div>
+                    <div class="st-desc">Request to remove a course from your registration.</div>
+                    <span class="st-tag tag-red">Registration</span>
+                  </a>
+                  <a href="#" class="service-tile amber" onclick="showPage('s-program', null)">
+                    <div class="st-title">Change Program</div>
+                    <div class="st-desc">Submit a formal request to transfer to a different programme.</div>
+                    <span class="st-tag tag-amber">Programme</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title">Frequently Asked Questions</div>
+                <div class="faq-item" id="fd1">
+                  <div class="faq-q" onclick="toggleFaq('fd1')"><span>How do I add a course to my registration?</span><span class="faq-chevron">v</span></div>
+                  <div class="faq-a">Navigate to "Add a Course" from the sidebar. Review the requirements and visit the Registry Services Office with your request. Additions are only permitted within the first two weeks of semester.</div>
+                </div>
+                <div class="faq-item" id="fd2">
+                  <div class="faq-q" onclick="toggleFaq('fd2')"><span>What is the standard credit allocation?</span><span class="faq-chevron">v</span></div>
+                  <div class="faq-a">The standard allocation is 18 credits per semester. Taking more than 18 requires a formal extra credits request, subject to a minimum CGPA of 3.0 and Registry approval.</div>
+                </div>
+                <div class="faq-item" id="fd3">
+                  <div class="faq-q" onclick="toggleFaq('fd3')"><span>How do I track the status of my request?</span><span class="faq-chevron">v</span></div>
+                  <div class="faq-a">You can track your request under "My Requests" in the sidebar. Requests are listed under Pending, Approved, or Denied with full details and any admin notes.</div>
+                </div>
+                <div style="margin-top:12px; text-align:right;">
+                  <a href="#" onclick="showPage('s-faq', null)" style="font-size:13px; color:var(--blue); font-weight:bold; text-decoration:none;">View all FAQs &gt;</a>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-title">Important Notices</div>
+                <div class="ibox info">Deadlines: Course additions close end of Week 2. Drops without financial penalty close Week 4.</div>
+                <div class="ibox warn">Credit overload: A minimum CGPA of 3.0 is required to exceed 18 credits per semester.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── EXTRA CREDITS ──────────────── -->
+        <div id="s-credits" class="s-page" style="display:none;">
+          <div class="ph">
+            <h2>Extra Credit Load</h2>
+            <p>Information and requirements for this service</p>
+          </div>
+          <div class="two-col">
+            <div>
+              <div class="card">
+                <div class="card-title">About This Service</div>
+                <p style="font-size:13.5px; color:var(--g600); line-height:1.7; margin-bottom:14px;">Students are allocated 18 credits per semester as the standard load. If you need to take additional courses beyond this allocation, you must submit a formal request to the Registry for approval.</p>
+                <div class="ibox warn">Students on academic probation are not eligible for a credit overload request.</div>
+              </div>
+              <div class="card">
+                <div class="card-title">Requirements</div>
+                <div class="req-list-items">
+                  <div class="req-item"><div class="req-num">1</div><div class="req-text">Minimum CGPA of 3.0</div></div>
+                  <div class="req-item"><div class="req-num">2</div><div class="req-text">Valid academic reason (graduation requirements, course dependencies)</div></div>
+                  <div class="req-item"><div class="req-num">3</div><div class="req-text">Supporting letter from your academic advisor (recommended)</div></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title">How It Works</div>
+                <div class="step-list">
+                  <div class="step-row"><div class="step-num">1</div><div class="step-text">Complete the Extra Credits request form at the Registry</div></div>
+                  <div class="step-row"><div class="step-num">2</div><div class="step-text">Provide a clear academic justification</div></div>
+                  <div class="step-row"><div class="step-num">3</div><div class="step-text">Your faculty advisor may be contacted for verification</div></div>
+                  <div class="step-row"><div class="step-num">4</div><div class="step-text">Registry will review and respond within 5–7 working days</div></div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-title">Contact</div>
+                <div class="ibox info">Registry Services Office, Student Affairs Building, Main Campus, Gaborone</div>
+                <div class="ibox info">Email: registry@ub.bw</div>
+                <div class="ibox info">Office hours: Mon–Fri, 08:00–16:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ADD A COURSE ───────────────── -->
+        <div id="s-addcourse" class="s-page" style="display:none;">
+          <div class="ph">
+            <h2>Add a Course</h2>
+            <p>Information and requirements for this service</p>
+          </div>
+          <div class="two-col">
+            <div>
+              <div class="card">
+                <div class="card-title">About This Service</div>
+                <p style="font-size:13.5px; color:var(--g600); line-height:1.7; margin-bottom:14px;">You may request to add a course to your current semester registration. This is subject to seat availability, prerequisite completion, and timetable compatibility.</p>
+                <div class="ibox warn">Requests submitted after Week 2 require Faculty Dean approval and may be subject to a late addition fee.</div>
+              </div>
+              <div class="card">
+                <div class="card-title">Requirements</div>
+                <div class="req-list-items">
+                  <div class="req-item"><div class="req-num">1</div><div class="req-text">Request submitted within the first 2 weeks of semester</div></div>
+                  <div class="req-item"><div class="req-num">2</div><div class="req-text">Completion of any listed prerequisites</div></div>
+                  <div class="req-item"><div class="req-num">3</div><div class="req-text">No timetable clashes with existing courses</div></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title">How It Works</div>
+                <div class="step-list">
+                  <div class="step-row"><div class="step-num">1</div><div class="step-text">Visit the Registry and select the course you wish to add</div></div>
+                  <div class="step-row"><div class="step-num">2</div><div class="step-text">Choose your preferred section and time slot</div></div>
+                  <div class="step-row"><div class="step-num">3</div><div class="step-text">Provide a reason for the addition</div></div>
+                  <div class="step-row"><div class="step-num">4</div><div class="step-text">Registry processes within 3–5 working days</div></div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-title">Contact</div>
+                <div class="ibox info">Registry Services Office, Student Affairs Building, Main Campus, Gaborone</div>
+                <div class="ibox info">Email: registry@ub.bw</div>
+                <div class="ibox info">Office hours: Mon–Fri, 08:00–16:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── DROP A COURSE ──────────────── -->
+        <div id="s-dropcourse" class="s-page" style="display:none;">
+          <div class="ph">
+            <h2>Drop a Course</h2>
+            <p>Information and requirements for this service</p>
+          </div>
+          <div class="two-col">
+            <div>
+              <div class="card">
+                <div class="card-title">About This Service</div>
+                <p style="font-size:13.5px; color:var(--g600); line-height:1.7; margin-bottom:14px;">You may request to drop a registered course during the semester. The timing of your drop determines whether it appears on your academic transcript and whether financial penalties apply.</p>
+                <div class="ibox err">Dropping after Week 4 results in a "W" (Withdrawal) grade on your transcript. Dropping below 12 credits may affect your full-time status and financial aid.</div>
+              </div>
+              <div class="card">
+                <div class="card-title">Requirements</div>
+                <div class="req-list-items">
+                  <div class="req-item"><div class="req-num">1</div><div class="req-text">Valid reason for dropping (schedule conflict, medical, academic load)</div></div>
+                  <div class="req-item"><div class="req-num">2</div><div class="req-text">Awareness of financial and academic implications</div></div>
+                  <div class="req-item"><div class="req-num">3</div><div class="req-text">Supporting documentation for medical or compassionate drops</div></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title">How It Works</div>
+                <div class="step-list">
+                  <div class="step-row"><div class="step-num">1</div><div class="step-text">Visit the Registry and select the course you wish to drop</div></div>
+                  <div class="step-row"><div class="step-num">2</div><div class="step-text">Indicate the drop category and reason</div></div>
+                  <div class="step-row"><div class="step-num">3</div><div class="step-text">Attach any supporting documents if applicable</div></div>
+                  <div class="step-row"><div class="step-num">4</div><div class="step-text">Registry will confirm the withdrawal within 3 working days</div></div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-title">Contact</div>
+                <div class="ibox info">Registry Services Office, Student Affairs Building, Main Campus, Gaborone</div>
+                <div class="ibox info">Email: registry@ub.bw</div>
+                <div class="ibox info">Office hours: Mon–Fri, 08:00–16:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── CHANGE PROGRAM ─────────────── -->
+        <div id="s-program" class="s-page" style="display:none;">
+          <div class="ph">
+            <h2>Change Programme of Study</h2>
+            <p>Information and requirements for this service</p>
+          </div>
+          <div class="two-col">
+            <div>
+              <div class="card">
+                <div class="card-title">About This Service</div>
+                <p style="font-size:13.5px; color:var(--g600); line-height:1.7; margin-bottom:14px;">A programme change is a formal request to transfer from your current academic programme to a different one. This process involves faculty review, credit recognition, and administrative approval.</p>
+                <div class="ibox warn">Credits completed in your current programme may be recognised by the receiving department at their discretion.</div>
+              </div>
+              <div class="card">
+                <div class="card-title">Requirements</div>
+                <div class="req-list-items">
+                  <div class="req-item"><div class="req-num">1</div><div class="req-text">Formal motivation letter</div></div>
+                  <div class="req-item"><div class="req-num">2</div><div class="req-text">Approval from your current Faculty</div></div>
+                  <div class="req-item"><div class="req-num">3</div><div class="req-text">Acceptance from the receiving Faculty</div></div>
+                  <div class="req-item"><div class="req-num">4</div><div class="req-text">Good academic standing is recommended</div></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title">How It Works</div>
+                <div class="step-list">
+                  <div class="step-row"><div class="step-num">1</div><div class="step-text">Select your target programme and preferred intake</div></div>
+                  <div class="step-row"><div class="step-num">2</div><div class="step-text">Write a detailed motivation letter</div></div>
+                  <div class="step-row"><div class="step-num">3</div><div class="step-text">Submit to the Registry with all supporting documents</div></div>
+                  <div class="step-row"><div class="step-num">4</div><div class="step-text">Processing takes up to 15 working days after submission</div></div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-title">Contact</div>
+                <div class="ibox info">Registry Services Office, Student Affairs Building, Main Campus, Gaborone</div>
+                <div class="ibox info">Email: registry@ub.bw</div>
+                <div class="ibox info">Office hours: Mon–Fri, 08:00–16:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MY REQUESTS: PENDING ───────── -->
+        <div id="s-pending" class="s-page" style="display:none;">
+          <div class="ph"><h2>Pending Requests</h2><p>2 requests awaiting review</p></div>
+          <div class="ibox info" style="margin-bottom:16px;">Your requests are under review by Registry Services. You will be notified once a decision is made.</div>
+          <div class="rcard pending">
+            <div class="r-body">
+              <div class="r-title">Extra Credits — Requesting 21 credits total</div>
+              <div class="r-meta">12 Jan 2026 &nbsp;&middot;&nbsp; REQ0001</div>
+              <div class="r-reason">I am in my final semester and need 3 extra courses to graduate on time. My CGPA is 3.6 and I have no outstanding academic issues.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tbc">Extra Credit Load</span>
+              <span class="sp sp-pending">Pending</span>
+            </div>
+          </div>
+          <div class="rcard pending">
+            <div class="r-body">
+              <div class="r-title">Add Course — STAT201 Statistics I</div>
+              <div class="r-meta">03 Jan 2026 &nbsp;&middot;&nbsp; REQ0004</div>
+              <div class="r-reason">STAT201 is a required elective for my BBA concentration. My advisor recommended I take it in Semester 2 to complete the analytics track on time.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tba">Add a Course</span>
+              <span class="sp sp-pending">Pending</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MY REQUESTS: APPROVED ──────── -->
+        <div id="s-approved" class="s-page" style="display:none;">
+          <div class="ph"><h2>Approved Requests</h2><p>2 requests approved</p></div>
+          <div class="ibox ok" style="margin-bottom:16px;">These requests have been approved. Contact the Registry if you need further assistance.</div>
+          <div class="rcard approved">
+            <div class="r-body">
+              <div class="r-title">Add Course — CS401 Artificial Intelligence</div>
+              <div class="r-meta">08 Jan 2026 &nbsp;&middot;&nbsp; REQ0002</div>
+              <div class="r-reason">CS401 is a prerequisite for my Honours research thesis in machine learning. I have completed CS201 and CS301 which are the listed prerequisites.</div>
+              <div class="r-note ok">Admin: Approved. Prerequisites confirmed. Registered in Section B.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tba">Add a Course</span>
+              <span class="sp sp-approved">Approved</span>
+            </div>
+          </div>
+          <div class="rcard approved">
+            <div class="r-body">
+              <div class="r-title">Drop Course — ENG101 Technical Writing</div>
+              <div class="r-meta">05 Jan 2026 &nbsp;&middot;&nbsp; REQ0005</div>
+              <div class="r-reason">ENG101 conflicts with a compulsory CS302 lab session. I will register for the evening section next semester.</div>
+              <div class="r-note ok">Admin: Approved. Withdrawal recorded. No academic penalty — within Week 2 deadline.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tbd">Drop a Course</span>
+              <span class="sp sp-approved">Approved</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MY REQUESTS: DENIED ────────── -->
+        <div id="s-denied" class="s-page" style="display:none;">
+          <div class="ph"><h2>Denied Requests</h2><p>1 request denied</p></div>
+          <div class="ibox err" style="margin-bottom:16px;">These requests were not approved. Review the admin note and consider resubmitting with additional documentation.</div>
+          <div class="rcard denied">
+            <div class="r-body">
+              <div class="r-title">Drop Course — MATH202 Linear Algebra</div>
+              <div class="r-meta">20 Dec 2025 &nbsp;&middot;&nbsp; REQ0003</div>
+              <div class="r-reason">Unavoidable timetable clash with mandatory CS302 lab. I plan to register for MATH202 again in Semester 1 next year.</div>
+              <div class="r-note err">Admin: MATH202 is a core requirement. A timetable exemption must first be obtained from your Faculty.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tbd">Drop a Course</span>
+              <span class="sp sp-denied">Denied</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STUDENT FAQ ─────────────────── -->
+        <div id="s-faq" class="s-page" style="display:none;">
+          <div class="ph"><h2>Frequently Asked Questions</h2><p>Answers to common student queries</p></div>
+          <div class="card">
+            <div class="card-title">Student FAQs</div>
+            <div class="faq-cat">Course Registration</div>
+            <div class="faq-item" id="sf1"><div class="faq-q" onclick="toggleFaq('sf1')"><span>How do I add a course to my registration?</span><span class="faq-chevron">v</span></div><div class="faq-a">Navigate to "Add a Course" from the sidebar. Review the requirements and visit the Registry Services Office with your request. Additions are only permitted within the first two weeks of semester.</div></div>
+            <div class="faq-item" id="sf2"><div class="faq-q" onclick="toggleFaq('sf2')"><span>Can I drop a course after the semester has started?</span><span class="faq-chevron">v</span></div><div class="faq-a">Yes. Drops within Weeks 1–2 leave no academic record. Drops in Weeks 3–4 may have financial implications. After Week 4, a "W" (Withdrawal) grade is recorded on your transcript.</div></div>
+            <div class="faq-item" id="sf3"><div class="faq-q" onclick="toggleFaq('sf3')"><span>What happens to my fees if I drop a course?</span><span class="faq-chevron">v</span></div><div class="faq-a">If you drop within the first two weeks, you may be eligible for a partial refund. After that period, the full tuition for the course remains payable. Contact the Finance Office for your specific situation.</div></div>
+            <div class="faq-cat">Credit Load</div>
+            <div class="faq-item" id="sf4"><div class="faq-q" onclick="toggleFaq('sf4')"><span>What is the standard credit allocation per semester?</span><span class="faq-chevron">v</span></div><div class="faq-a">The standard allocation is 18 credits per semester. Taking more than 18 requires a formal extra credits request, subject to a minimum CGPA of 3.0 and Registry approval.</div></div>
+            <div class="faq-item" id="sf5"><div class="faq-q" onclick="toggleFaq('sf5')"><span>What CGPA do I need to apply for extra credits?</span><span class="faq-chevron">v</span></div><div class="faq-a">A minimum Cumulative Grade Point Average (CGPA) of 3.0 is required. Students on academic probation are not eligible.</div></div>
+            <div class="faq-cat">Programme Changes</div>
+            <div class="faq-item" id="sf6"><div class="faq-q" onclick="toggleFaq('sf6')"><span>How long does a programme change take to process?</span><span class="faq-chevron">v</span></div><div class="faq-a">Programme change requests take up to 15 working days to process after submission. This allows time for both your current and target faculty to review the application.</div></div>
+            <div class="faq-item" id="sf7"><div class="faq-q" onclick="toggleFaq('sf7')"><span>Will my completed credits transfer if I change programmes?</span><span class="faq-chevron">v</span></div><div class="faq-a">Credits may be recognised by the receiving department at their discretion. A credit recognition assessment is conducted as part of the programme change review process.</div></div>
+            <div class="faq-cat">General</div>
+            <div class="faq-item" id="sf8"><div class="faq-q" onclick="toggleFaq('sf8')"><span>How do I track the status of my request?</span><span class="faq-chevron">v</span></div><div class="faq-a">You can track your request under "My Requests" in the sidebar. Requests are listed under Pending, Approved, or Denied with full details and any admin notes.</div></div>
+            <div class="faq-item" id="sf9"><div class="faq-q" onclick="toggleFaq('sf9')"><span>Who do I contact if my request is denied?</span><span class="faq-chevron">v</span></div><div class="faq-a">If your request is denied, you have the right to appeal within 5 working days. Contact the Faculty Dean's Office with additional supporting documentation and a written motivation.</div></div>
+            <div class="faq-item" id="sf10"><div class="faq-q" onclick="toggleFaq('sf10')"><span>What are Registry Services office hours?</span><span class="faq-chevron">v</span></div><div class="faq-a">The Registry Services Office is open Monday to Friday, 08:00–16:30. You can also email registry@ub.bw or call +267 355 0000.</div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Still Need Help?</div>
+            <div class="ibox info">Visit Registry Services, Student Affairs Building, Main Campus, Gaborone.</div>
+            <div class="ibox info">Email: registry@ub.bw</div>
+            <div class="ibox info">Tel: +267 355 0000 &nbsp;&middot;&nbsp; Hours: Mon–Fri 08:00–16:30</div>
+          </div>
+        </div>
+
+      </div><!-- /main -->
+    </div><!-- /layout -->
+  </div><!-- /studentShell -->
+
+  <!-- ADMIN SHELL -->
+  <div id="adminShell" style="display:none;">
+    <div class="topbar">
+      <div class="topbar-title">University of Botswana — Student Help Desk</div>
+      <span class="topbar-user" id="adminName"></span>
+      <div class="bell-wrap">
+        <button class="bell-btn" onclick="showAdminPage('a-pending', null)">Alerts</button>
+        <span class="bell-count">2</span>
+      </div>
+      <a href="#" class="topbar-logout" onclick="doLogout()">Log out</a>
+    </div>
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sb-section">
+          <div class="sb-label">Overview</div>
+          <a href="#" class="sb-link active" onclick="showAdminPage('a-dashboard', this)">Dashboard</a>
+        </div>
+        <div class="sb-section">
+          <div class="sb-label">Requests</div>
+          <a href="#" class="sb-link" onclick="showAdminPage('a-pending', this)">Pending</a>
+          <a href="#" class="sb-link" onclick="showAdminPage('a-approved', this)">Approved</a>
+          <a href="#" class="sb-link" onclick="showAdminPage('a-denied', this)">Denied</a>
+        </div>
+        <div class="sb-section">
+          <div class="sb-label">Analytics</div>
+          <a href="#" class="sb-link" onclick="showAdminPage('a-report', this)">Reports</a>
+        </div>
+        <div class="sb-section">
+          <div class="sb-label">Help</div>
+          <a href="#" class="sb-link" onclick="showAdminPage('a-faq', this)">FAQs</a>
+        </div>
+      </div>
+      <div class="main">
+
+        <!-- ── ADMIN DASHBOARD ─────────────── -->
+        <div id="a-dashboard" class="a-page">
+          <div class="ph">
+            <h2>Admin Dashboard</h2>
+            <p id="adminGreeting">Welcome back — Registry Services</p>
+          </div>
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-val">5</div>
+              <div class="stat-lbl">Total Requests</div>
+              <div class="stat-sub" style="color:var(--g400)">All time</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val">2</div>
+              <div class="stat-lbl">Pending</div>
+              <div class="stat-sub" style="color:var(--amber)">Need your action</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val">2</div>
+              <div class="stat-lbl">Approved</div>
+              <div class="stat-sub" style="color:var(--green)">40% approval rate</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val">1</div>
+              <div class="stat-lbl">Denied</div>
+              <div class="stat-sub" style="color:var(--red)">20% of total</div>
+            </div>
+          </div>
+          <div class="two-col">
+            <div>
+              <div class="card">
+                <div class="card-title">Recent Submissions &nbsp;<span style="background:var(--amber-l);color:var(--amber);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:bold;">2 pending</span></div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+                    <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Extra Credits — Requesting 21 credits total</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Kefilwe Moeti &middot; 12 Jan 2026</div></div>
+                    <span class="sp sp-pending">Pending</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+                    <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Add Course — CS401 Artificial Intelligence</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Kefilwe Moeti &middot; 08 Jan 2026</div></div>
+                    <span class="sp sp-approved">Approved</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+                    <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Drop Course — ENG101 Technical Writing</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Kefilwe Moeti &middot; 05 Jan 2026</div></div>
+                    <span class="sp sp-approved">Approved</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+                    <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Add Course — STAT201 Statistics I</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Tebogo Kgosi &middot; 03 Jan 2026</div></div>
+                    <span class="sp sp-pending">Pending</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g100);border-radius:7px;">
+                    <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:bold;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Drop Course — MATH202 Linear Algebra</div><div style="font-size:12px;color:var(--g400);margin-top:1px;">Tebogo Kgosi &middot; 20 Dec 2025</div></div>
+                    <span class="sp sp-denied">Denied</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title">Requests by Type</div>
+                <div class="bar-row"><div class="bar-label">Extra Credit Load<span class="bar-sub">1 submission</span></div><div class="bar-track"><div class="bar-fill" style="width:20%;background:#1a56db;">20%</div></div><div class="bar-pct">20%</div></div>
+                <div class="bar-row"><div class="bar-label">Add a Course<span class="bar-sub">2 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--green);">40%</div></div><div class="bar-pct">40%</div></div>
+                <div class="bar-row"><div class="bar-label">Drop a Course<span class="bar-sub">2 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--red);">40%</div></div><div class="bar-pct">40%</div></div>
+                <div class="bar-row"><div class="bar-label">Change Program<span class="bar-sub">0 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber);"></div></div><div class="bar-pct">0%</div></div>
+              </div>
+              <div class="card">
+                <div class="card-title">FAQs — Quick Reference</div>
+                <div class="faq-item" id="ad1"><div class="faq-q" onclick="toggleFaq('ad1')"><span>How do I approve or deny a student request?</span><span class="faq-chevron">v</span></div><div class="faq-a">Navigate to "Pending Requests" from the sidebar. Each request shows the student's details, reason, and request type. Use the Approve or Deny buttons to action each request.</div></div>
+                <div class="faq-item" id="ad2"><div class="faq-q" onclick="toggleFaq('ad2')"><span>What does the report page show?</span><span class="faq-chevron">v</span></div><div class="faq-a">The Reports page shows a summary of all help desk activity: total requests, status counts, a bar chart by type, a donut chart, and a full submissions table.</div></div>
+                <div class="faq-item" id="ad3"><div class="faq-q" onclick="toggleFaq('ad3')"><span>What request types can students submit?</span><span class="faq-chevron">v</span></div><div class="faq-a">Students can submit four types: Extra Credit Load, Add a Course, Drop a Course, and Change Programme of Study. Each has its own eligibility criteria and processing timeline.</div></div>
+                <div style="margin-top:12px; text-align:right;"><a href="#" onclick="showAdminPage('a-faq', null)" style="font-size:13px;color:var(--blue);font-weight:bold;text-decoration:none;">View all FAQs &gt;</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ADMIN PENDING ───────────────── -->
+        <div id="a-pending" class="a-page" style="display:none;">
+          <div class="ph"><h2>Pending Requests</h2><p>2 requests awaiting your review</p></div>
+          <div class="rcard pending">
+            <div class="r-body">
+              <div class="r-title">Extra Credits — Requesting 21 credits total</div>
+              <div class="r-meta"><strong>Kefilwe Moeti</strong> &nbsp;&middot;&nbsp; UB23050001 &nbsp;&middot;&nbsp; 12 Jan 2026 &nbsp;&middot;&nbsp; REQ0001</div>
+              <div class="r-reason">I am in my final semester and need 3 extra courses to graduate on time. My CGPA is 3.6 and I have no outstanding academic issues.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tbc">Extra Credit Load</span>
+              <span class="sp sp-pending">Pending</span>
+              <div class="admin-acts">
+                <button class="btn-ok">Approve</button>
+                <button class="btn-no">Deny</button>
+              </div>
+            </div>
+          </div>
+          <div class="rcard pending">
+            <div class="r-body">
+              <div class="r-title">Add Course — STAT201 Statistics I</div>
+              <div class="r-meta"><strong>Tebogo Kgosi</strong> &nbsp;&middot;&nbsp; UB23050002 &nbsp;&middot;&nbsp; 03 Jan 2026 &nbsp;&middot;&nbsp; REQ0004</div>
+              <div class="r-reason">STAT201 is a required elective for my BBA concentration. My advisor recommended I take it in Semester 2 to complete the analytics track on time.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tba">Add a Course</span>
+              <span class="sp sp-pending">Pending</span>
+              <div class="admin-acts">
+                <button class="btn-ok">Approve</button>
+                <button class="btn-no">Deny</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ADMIN APPROVED ──────────────── -->
+        <div id="a-approved" class="a-page" style="display:none;">
+          <div class="ph"><h2>Approved Requests</h2><p>2 requests approved</p></div>
+          <div class="rcard approved">
+            <div class="r-body">
+              <div class="r-title">Add Course — CS401 Artificial Intelligence</div>
+              <div class="r-meta"><strong>Kefilwe Moeti</strong> &nbsp;&middot;&nbsp; UB23050001 &nbsp;&middot;&nbsp; 08 Jan 2026 &nbsp;&middot;&nbsp; REQ0002</div>
+              <div class="r-reason">CS401 is a prerequisite for my Honours research thesis. I have completed CS201 and CS301 which are the listed prerequisites.</div>
+              <div class="r-note ok">Decision note: Approved. Prerequisites confirmed. Registered in Section B.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tba">Add a Course</span>
+              <span class="sp sp-approved">Approved</span>
+              <div class="by-note">By Dr. Ruth Sebele<br>09 Jan 2026</div>
+            </div>
+          </div>
+          <div class="rcard approved">
+            <div class="r-body">
+              <div class="r-title">Drop Course — ENG101 Technical Writing</div>
+              <div class="r-meta"><strong>Kefilwe Moeti</strong> &nbsp;&middot;&nbsp; UB23050001 &nbsp;&middot;&nbsp; 05 Jan 2026 &nbsp;&middot;&nbsp; REQ0005</div>
+              <div class="r-reason">ENG101 conflicts with a compulsory CS302 lab session. I will register for the evening section next semester.</div>
+              <div class="r-note ok">Decision note: Approved. Withdrawal recorded. No academic penalty — within Week 2 deadline.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tbd">Drop a Course</span>
+              <span class="sp sp-approved">Approved</span>
+              <div class="by-note">By Dr. Ruth Sebele<br>06 Jan 2026</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ADMIN DENIED ────────────────── -->
+        <div id="a-denied" class="a-page" style="display:none;">
+          <div class="ph"><h2>Denied Requests</h2><p>1 request denied</p></div>
+          <div class="rcard denied">
+            <div class="r-body">
+              <div class="r-title">Drop Course — MATH202 Linear Algebra</div>
+              <div class="r-meta"><strong>Tebogo Kgosi</strong> &nbsp;&middot;&nbsp; UB23050002 &nbsp;&middot;&nbsp; 20 Dec 2025 &nbsp;&middot;&nbsp; REQ0003</div>
+              <div class="r-reason">Unavoidable timetable clash with mandatory CS302 lab. I plan to register for MATH202 again in Semester 1 next year.</div>
+              <div class="r-note err">Decision note: MATH202 is a core requirement. A timetable exemption must first be obtained from your Faculty.</div>
+            </div>
+            <div class="r-right">
+              <span class="tbadge tbd">Drop a Course</span>
+              <span class="sp sp-denied">Denied</span>
+              <div class="by-note">By Dr. Ruth Sebele<br>21 Dec 2025</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ADMIN REPORT ────────────────── -->
+        <div id="a-report" class="a-page" style="display:none;">
+          <div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+            <div><h2>Requests Report</h2><p>Summary generated <span id="reportDate"></span></p></div>
+            <button class="print-btn" onclick="window.print()">Print Report</button>
+          </div>
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-val">5</div><div class="stat-lbl">Total Requests</div><div class="stat-sub" style="color:var(--g400)">All time</div></div>
+            <div class="stat-card"><div class="stat-val">2</div><div class="stat-lbl">Pending</div><div class="stat-sub" style="color:var(--amber)">40% of total</div></div>
+            <div class="stat-card"><div class="stat-val">2</div><div class="stat-lbl">Approved</div><div class="stat-sub" style="color:var(--green)">40% approval rate</div></div>
+            <div class="stat-card"><div class="stat-val">1</div><div class="stat-lbl">Denied</div><div class="stat-sub" style="color:var(--red)">20% of total</div></div>
+          </div>
+          <div class="rep-grid">
+            <div class="card">
+              <div class="card-title">Requests by Type</div>
+              <div class="bar-row"><div class="bar-label">Extra Credit Load<span class="bar-sub">1 submission</span></div><div class="bar-track"><div class="bar-fill" style="width:20%;background:#1a56db;">20%</div></div><div class="bar-pct">20%</div></div>
+              <div class="bar-row"><div class="bar-label">Add a Course<span class="bar-sub">2 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--green);">40%</div></div><div class="bar-pct">40%</div></div>
+              <div class="bar-row"><div class="bar-label">Drop a Course<span class="bar-sub">2 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--red);">40%</div></div><div class="bar-pct">40%</div></div>
+              <div class="bar-row"><div class="bar-label">Change Program<span class="bar-sub">0 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber);"></div></div><div class="bar-pct">0%</div></div>
+            </div>
+            <div class="card">
+              <div class="card-title">Status Breakdown</div>
+              <div class="dnut-wrap">
+                <canvas id="donutCanvas" width="180" height="180"></canvas>
+                <div class="dnut-leg">
+                  <div class="leg-item"><div class="leg-dot" style="background:#e67e22;"></div><div><div class="leg-val">2 — 40%</div><div style="font-size:11px;color:var(--g400)">Pending</div></div></div>
+                  <div class="leg-item"><div class="leg-dot" style="background:#1a7a4a;"></div><div><div class="leg-val">2 — 40%</div><div style="font-size:11px;color:var(--g400)">Approved</div></div></div>
+                  <div class="leg-item"><div class="leg-dot" style="background:#c0392b;"></div><div><div class="leg-val">1 — 20%</div><div style="font-size:11px;color:var(--g400)">Denied</div></div></div>
+                  <div class="leg-item" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--g200);"><div class="leg-dot" style="background:var(--g300);"></div><div><div class="leg-val">5</div><div style="font-size:11px;color:var(--g400)">Total</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">All Submissions</div>
+            <table class="rep-tbl">
+              <thead><tr><th>ID</th><th>Student</th><th>Request</th><th>Type</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0001</td><td><strong>Kefilwe Moeti</strong><br><span style="font-size:11px;color:var(--g400)">UB23050001</span></td><td>Extra Credits — Requesting 21 credits total</td><td><span class="tbadge tbc">Extra Credit Load</span></td><td>12 Jan 2026</td><td><span class="sp sp-pending">Pending</span></td></tr>
+                <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0002</td><td><strong>Kefilwe Moeti</strong><br><span style="font-size:11px;color:var(--g400)">UB23050001</span></td><td>Add Course — CS401 Artificial Intelligence</td><td><span class="tbadge tba">Add a Course</span></td><td>08 Jan 2026</td><td><span class="sp sp-approved">Approved</span></td></tr>
+                <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0003</td><td><strong>Tebogo Kgosi</strong><br><span style="font-size:11px;color:var(--g400)">UB23050002</span></td><td>Drop Course — MATH202 Linear Algebra</td><td><span class="tbadge tbd">Drop a Course</span></td><td>20 Dec 2025</td><td><span class="sp sp-denied">Denied</span></td></tr>
+                <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0004</td><td><strong>Tebogo Kgosi</strong><br><span style="font-size:11px;color:var(--g400)">UB23050002</span></td><td>Add Course — STAT201 Statistics I</td><td><span class="tbadge tba">Add a Course</span></td><td>03 Jan 2026</td><td><span class="sp sp-pending">Pending</span></td></tr>
+                <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0005</td><td><strong>Kefilwe Moeti</strong><br><span style="font-size:11px;color:var(--g400)">UB23050001</span></td><td>Drop Course — ENG101 Technical Writing</td><td><span class="tbadge tbd">Drop a Course</span></td><td>05 Jan 2026</td><td><span class="sp sp-approved">Approved</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── ADMIN FAQ ───────────────────── -->
+        <div id="a-faq" class="a-page" style="display:none;">
+          <div class="ph"><h2>Administrator FAQs</h2><p>Reference guide for managing the UB Student Help Desk</p></div>
+          <div class="card">
+            <div class="card-title">Admin FAQs</div>
+            <div class="faq-cat">Managing Requests</div>
+            <div class="faq-item" id="af1"><div class="faq-q" onclick="toggleFaq('af1')"><span>How do I approve or deny a student request?</span><span class="faq-chevron">v</span></div><div class="faq-a">Navigate to "Pending Requests" from the sidebar. Each request card shows the student's details, reason, and request type. Use the Approve or Deny buttons to action each request. You can add a decision note that will be visible to the student.</div></div>
+            <div class="faq-item" id="af2"><div class="faq-q" onclick="toggleFaq('af2')"><span>Can I add a note when approving or denying a request?</span><span class="faq-chevron">v</span></div><div class="faq-a">Yes. When actioning a pending request, there is a text field for an admin decision note. This note is displayed to the student on their request card and helps them understand the outcome or next steps.</div></div>
+            <div class="faq-item" id="af3"><div class="faq-q" onclick="toggleFaq('af3')"><span>How is the bell notification count calculated?</span><span class="faq-chevron">v</span></div><div class="faq-a">The bell icon in the top bar shows the total number of requests currently in "Pending" status. This count updates each time a request is approved or denied.</div></div>
+            <div class="faq-cat">Reports</div>
+            <div class="faq-item" id="af4"><div class="faq-q" onclick="toggleFaq('af4')"><span>What does the report page show?</span><span class="faq-chevron">v</span></div><div class="faq-a">The Reports page shows a summary of all help desk activity: total requests, pending/approved/denied counts, a bar chart broken down by request type, a donut chart for status breakdown, and a full submissions table.</div></div>
+            <div class="faq-item" id="af5"><div class="faq-q" onclick="toggleFaq('af5')"><span>Can I print or export the report?</span><span class="faq-chevron">v</span></div><div class="faq-a">Yes. Use the "Print Report" button at the top of the Reports page. This triggers a print-optimised view that hides navigation and formats the report cleanly for printing or saving as a PDF.</div></div>
+            <div class="faq-cat">General</div>
+            <div class="faq-item" id="af6"><div class="faq-q" onclick="toggleFaq('af6')"><span>What request types can students submit?</span><span class="faq-chevron">v</span></div><div class="faq-a">Students can submit four types of requests: Extra Credit Load (to exceed 18 credits), Add a Course, Drop a Course, and Change Programme of Study. Each type has its own eligibility criteria and processing timeline.</div></div>
+            <div class="faq-item" id="af7"><div class="faq-q" onclick="toggleFaq('af7')"><span>How do I contact a student about their request?</span><span class="faq-chevron">v</span></div><div class="faq-a">Student contact details are managed through the main UB student information system. Use the student ID shown on each request card to look up contact details in the UB staff portal.</div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">IT Support</div>
+            <div class="ibox info">For technical issues with the Help Desk system, contact ICT Services at ict@ub.bw</div>
+            <div class="ibox info">ICT Helpline: +267 355 2000 &nbsp;&middot;&nbsp; Hours: Mon–Fri 07:30–17:00</div>
+          </div>
+        </div>
+
+      </div><!-- /main -->
+    </div><!-- /layout -->
+  </div><!-- /adminShell -->
+
+</div><!-- /appShell -->
+
+<script>
+var selectedRole = 'student';
+
+function setRole(btn, role) {
+  selectedRole = role;
+  document.querySelectorAll('.rtab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function doLogin() {
+  var id = document.getElementById('loginId').value.trim();
+  var pw = document.getElementById('loginPw').value.trim();
+  var students = { 'UB23050001': { pass: 'student123', name: 'Kefilwe Moeti' }, 'UB23050002': { pass: 'student123', name: 'Tebogo Kgosi' } };
+  var admins   = { 'ADM001': { pass: 'admin123', name: 'Dr. Ruth Sebele' } };
+
+  if (selectedRole === 'student') {
+    var s = students[id];
+    if (!s || s.pass !== pw) { alert('Invalid student ID or password.'); return; }
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    document.getElementById('studentShell').style.display = 'block';
+    document.getElementById('adminShell').style.display = 'none';
+    document.getElementById('studentName').textContent = s.name;
+    document.getElementById('s-dash-greeting').textContent = 'Good day, ' + s.name.split(' ')[0];
+  } else {
+    var a = admins[id];
+    if (!a || a.pass !== pw) { alert('Invalid admin ID or password.'); return; }
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    document.getElementById('adminShell').style.display = 'block';
+    document.getElementById('studentShell').style.display = 'none';
+    document.getElementById('adminName').textContent = a.name;
+    document.getElementById('adminGreeting').textContent = 'Welcome back, ' + a.name + ' — Registry Services';
+    var d = new Date();
+    document.getElementById('reportDate').textContent = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+    drawDonut();
+  }
+}
+
+function doLogout() {
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginId').value = '';
+  document.getElementById('loginPw').value = '';
+}
+
+function showPage(id, link) {
+  document.querySelectorAll('.s-page').forEach(function(p) { p.style.display = 'none'; });
+  document.getElementById(id).style.display = 'block';
+  if (link) {
+    document.querySelectorAll('#studentShell .sb-link').forEach(function(l) { l.classList.remove('active'); });
+    link.classList.add('active');
+  }
+  return false;
+}
+
+function showAdminPage(id, link) {
+  document.querySelectorAll('.a-page').forEach(function(p) { p.style.display = 'none'; });
+  document.getElementById(id).style.display = 'block';
+  if (link) {
+    document.querySelectorAll('#adminShell .sb-link').forEach(function(l) { l.classList.remove('active'); });
+    link.classList.add('active');
+  }
+  if (id === 'a-report') drawDonut();
+  return false;
+}
+
+function toggleFaq(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+function drawDonut() {
+  var c = document.getElementById('donutCanvas');
+  if (!c) return;
+  var ctx = c.getContext('2d');
+  var vals = [
+    { v: 2, col: '#e67e22' },
+    { v: 2, col: '#1a7a4a' },
+    { v: 1, col: '#c0392b' }
+  ];
+  var total = 5;
+  ctx.clearRect(0, 0, 180, 180);
+  var start = -Math.PI / 2;
+  vals.forEach(function(v) {
+    var sl = (v.v / total) * Math.PI * 2;
+    ctx.beginPath(); ctx.moveTo(90, 90); ctx.arc(90, 90, 78, start, start + sl);
+    ctx.fillStyle = v.col; ctx.fill(); start += sl;
+  });
+  ctx.beginPath(); ctx.arc(90, 90, 46, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+  ctx.fillStyle = '#0a1628'; ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center'; ctx.fillText('5', 90, 86);
+  ctx.font = '10px Arial'; ctx.fillStyle = '#9a9aac'; ctx.fillText('total', 90, 102);
+}
+</script>
+</body>
+</html>

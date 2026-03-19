@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - FAQ Management</title>
+<link rel="stylesheet" href="style.css">
+<script src="shared.js"></script>
+<style>
+/* ── Tabs ───────────────────────────────────────────────── */
+.tab-bar { display: flex; gap: 6px; margin-bottom: 20px; }
+.tab-btn {
+  padding: 8px 20px; border-radius: 7px; border: 1.5px solid var(--g200);
+  background: var(--white); color: var(--g600);
+  font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; cursor: pointer;
+}
+.tab-btn.active { background: var(--navy); color: var(--gold); border-color: var(--navy); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.badge {
+  display: inline-block; background: var(--amber); color: #fff;
+  border-radius: 20px; padding: 1px 7px; font-size: 10px;
+  font-weight: bold; margin-left: 5px; vertical-align: middle;
+}
+
+/* ── Add / Edit Form ────────────────────────────────────── */
+.faq-form {
+  background: var(--g100);
+  border: 1.5px solid var(--g200);
+  border-radius: var(--r);
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+.faq-form-title { font-size: 14px; font-weight: bold; color: var(--navy); margin-bottom: 16px; }
+.form-row { margin-bottom: 14px; }
+.form-row label {
+  display: block; font-size: 11px; font-weight: bold; color: var(--g600);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;
+}
+.form-row input, .form-row select, .form-row textarea {
+  width: 100%; padding: 10px 12px;
+  border: 1.5px solid var(--g200); border-radius: 7px;
+  font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: var(--navy);
+  outline: none; background: var(--white);
+}
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--gold); }
+.form-row textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+.form-actions { display: flex; gap: 8px; margin-top: 6px; }
+.btn-save {
+  padding: 9px 22px; background: var(--navy); color: var(--gold); border: none;
+  border-radius: 7px; font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px; font-weight: bold; cursor: pointer;
+}
+.btn-save:hover { background: var(--navy2); }
+.btn-cancel {
+  padding: 9px 18px; background: var(--white); color: var(--g600);
+  border: 1.5px solid var(--g200); border-radius: 7px;
+  font-family: Arial, Helvetica, sans-serif; font-size: 13px; cursor: pointer;
+}
+.btn-cancel:hover { background: var(--g100); }
+
+/* ── FAQ List Items ─────────────────────────────────────── */
+.faq-mgmt-item {
+  background: var(--white); border: 1px solid var(--g200);
+  border-radius: 8px; padding: 16px 18px; margin-bottom: 10px;
+  box-shadow: var(--s1); display: flex; gap: 14px; align-items: flex-start;
+}
+.faq-mgmt-body { flex: 1; min-width: 0; }
+.faq-mgmt-q { font-size: 14px; font-weight: bold; color: var(--navy); margin-bottom: 5px; }
+.faq-mgmt-a { font-size: 13px; color: var(--g600); line-height: 1.6; }
+.faq-mgmt-meta { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.faq-cat-badge {
+  padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: bold;
+  background: var(--blue-l); color: var(--blue);
+}
+.faq-cat-badge.new { background: var(--green-l); color: var(--green); }
+.faq-mgmt-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.btn-edit {
+  padding: 6px 14px; background: var(--white); color: var(--navy);
+  border: 1.5px solid var(--g200); border-radius: 6px;
+  font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; cursor: pointer;
+}
+.btn-edit:hover { background: var(--g100); }
+.btn-del {
+  padding: 6px 14px; background: var(--white); color: var(--red);
+  border: 1.5px solid var(--red-m); border-radius: 6px;
+  font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; cursor: pointer;
+}
+.btn-del:hover { background: var(--red-l); }
+
+/* ── Submitted questions ────────────────────────────────── */
+.sq-card {
+  background: var(--white); border: 1px solid var(--g200);
+  border-left: 4px solid var(--amber); border-radius: 8px;
+  padding: 16px 18px; margin-bottom: 10px; box-shadow: var(--s1);
+}
+.sq-card.approved  { border-left-color: var(--green); }
+.sq-card.dismissed { border-left-color: var(--g300); opacity: 0.6; }
+.sq-question { font-size: 14px; font-weight: bold; color: var(--navy); margin-bottom: 5px; }
+.sq-meta     { font-size: 12px; color: var(--g400); margin-bottom: 12px; }
+.sq-inline-form { display: none; }
+.sq-inline-form.visible { display: block; }
+.sq-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.btn-approve {
+  padding: 7px 16px; background: var(--green); color: #fff; border: none;
+  border-radius: 6px; font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; cursor: pointer;
+}
+.btn-approve:hover { background: #15663d; }
+.btn-dismiss {
+  padding: 7px 16px; background: var(--white); color: var(--g600);
+  border: 1.5px solid var(--g200); border-radius: 6px;
+  font-family: Arial, Helvetica, sans-serif; font-size: 12px; cursor: pointer;
+}
+.btn-dismiss:hover { background: var(--g100); }
+.sq-status-pill {
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; margin-left: auto;
+}
+.sq-status-pill.approved  { background: var(--green-l); color: var(--green); }
+.sq-status-pill.dismissed { background: var(--g200);    color: var(--g600); }
+.sq-approved-answer {
+  margin-top: 8px; padding: 10px 12px;
+  background: var(--green-l); border-radius: 6px;
+  font-size: 12.5px; color: var(--green); line-height: 1.55;
+}
+
+.empty-state { text-align: center; padding: 40px 20px; }
+.empty-state strong { display: block; font-size: 15px; color: var(--g600); margin-bottom: 6px; }
+.empty-state p { font-size: 13px; color: var(--g400); }
+
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--navy); color: var(--gold);
+  padding: 12px 20px; border-radius: 8px;
+  font-size: 13px; font-weight: bold;
+  box-shadow: var(--s2); display: none; z-index: 999;
+}
+.toast.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
+  <span class="topbar-user" id="topbar-name"></span>
+  <div class="bell-wrap">
+    <a href="admin-pending.html" class="bell-btn">Alerts</a>
+    <span class="bell-count">2</span>
+  </div>
+  <a href="index.html" class="topbar-logout">Log out</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Overview</div>
+      <a href="admin-dashboard.html" class="sb-link">Dashboard</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Requests</div>
+      <a href="admin-pending.html" class="sb-link">Pending</a>
+      <a href="admin-approved.html" class="sb-link">Approved</a>
+      <a href="admin-denied.html" class="sb-link">Denied</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Analytics</div>
+      <a href="admin-report.html" class="sb-link">Reports</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Help</div>
+      <a href="admin-faq.html" class="sb-link active">FAQs</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="ph">
+      <h2>FAQ Management</h2>
+      <p>Add, edit and delete FAQ entries &mdash; and review questions submitted by students</p>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-manage" onclick="switchTab('manage')">FAQ Knowledge Base</button>
+      <button class="tab-btn" id="tab-submitted" onclick="switchTab('submitted')">
+        Student Questions <span class="badge" id="pendingBadge" style="display:none">0</span>
+      </button>
+    </div>
+
+    <!-- ── TAB: FAQ Knowledge Base ───────────────────── -->
+    <div class="tab-panel active" id="panel-manage">
+
+      <!-- Add new FAQ form -->
+      <div class="faq-form" id="addForm">
+        <div class="faq-form-title">Add New FAQ Entry</div>
+        <div class="form-row">
+          <label>Category</label>
+          <select id="newCat">
+            <option>Course Registration</option>
+            <option>Credit Load</option>
+            <option>Programme Changes</option>
+            <option>General</option>
+            <option value="__custom__">+ Custom category...</option>
+          </select>
+        </div>
+        <div class="form-row" id="customCatRow" style="display:none;">
+          <label>Custom Category Name</label>
+          <input type="text" id="customCat" placeholder="Enter category name">
+        </div>
+        <div class="form-row">
+          <label>Question</label>
+          <input type="text" id="newQ" placeholder="e.g. What happens if I miss the drop deadline?">
+        </div>
+        <div class="form-row">
+          <label>Answer</label>
+          <textarea id="newA" placeholder="Write a clear and complete answer..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" onclick="addFaq()">Add to FAQ</button>
+        </div>
+      </div>
+
+      <!-- FAQ list -->
+      <div class="card">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>All FAQ Entries</span>
+          <span id="faqCount" style="font-size:12px;color:var(--g400);font-weight:normal;"></span>
+        </div>
+        <div id="faqList"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: Student Submitted Questions ─────────── -->
+    <div class="tab-panel" id="panel-submitted">
+      <div class="card">
+        <div class="card-title">Questions Submitted by Students</div>
+        <p style="font-size:13px;color:var(--g400);margin-bottom:16px;">
+          When a student's RAG answer has low confidence, they can submit their question here.
+          Write an official answer and approve it to add it directly to the FAQ knowledge base.
+        </p>
+        <div id="submittedList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+var u = requireAdmin();
+if (u) document.getElementById('topbar-name').textContent = u.name;
+
+// ── Base FAQ data ─────────────────────────────────────────
+var BASE_FAQS = [
+  { id:'s001', category:'Course Registration', question:'How do I add a course to my registration?', answer:'Navigate to the Add a Course service page from the sidebar. Review the requirements and visit the Registry Services Office. Additions are only permitted within the first two weeks of semester.', isBase: true },
+  { id:'s002', category:'Course Registration', question:'Can I drop a course after the semester has started?', answer:'Yes. Drops within Weeks 1 to 2 leave no academic record. After Week 4, a W (Withdrawal) grade is recorded on your transcript.', isBase: true },
+  { id:'s003', category:'Course Registration', question:'What happens to my fees if I drop a course?', answer:'If you drop within the first two weeks, you may be eligible for a partial refund. After that period, the full tuition remains payable. Contact the Finance Office for your specific situation.', isBase: true },
+  { id:'s004', category:'Course Registration', question:'What is the deadline to add or drop a course?', answer:'Course additions close at the end of Week 2. Drops without financial penalty close at the end of Week 2. After Week 4, a Withdrawal grade is recorded.', isBase: true },
+  { id:'s005', category:'Credit Load', question:'What is the standard credit allocation per semester?', answer:'The standard allocation is 18 credits per semester. Taking more than 18 requires a formal Extra Credits request, subject to a minimum CGPA of 3.0.', isBase: true },
+  { id:'s006', category:'Credit Load', question:'What CGPA do I need to apply for extra credits?', answer:'A minimum CGPA of 3.0 is required. Students on academic probation are not eligible.', isBase: true },
+  { id:'s007', category:'Credit Load', question:'How many extra credits can I take?', answer:'The maximum overload permitted is typically 21 credits. Requests beyond 21 require exceptional circumstances and Dean approval.', isBase: true },
+  { id:'s008', category:'Programme Changes', question:'How long does a programme change take to process?', answer:'Programme change requests take up to 15 working days to process after submission.', isBase: true },
+  { id:'s009', category:'Programme Changes', question:'Will my completed credits transfer if I change programmes?', answer:'Credits may be recognised by the receiving department at their discretion. A credit recognition assessment is conducted as part of the review.', isBase: true },
+  { id:'s010', category:'Programme Changes', question:'What documents do I need to change my programme?', answer:'You need a formal motivation letter, approval from your current Faculty, and acceptance from the receiving Faculty.', isBase: true },
+  { id:'s011', category:'General', question:'How do I track the status of my request?', answer:'Track requests under My Requests in the sidebar — listed as Pending, Approved, or Denied with full details and any admin notes.', isBase: true },
+  { id:'s012', category:'General', question:'Who do I contact if my request is denied?', answer:'You have the right to appeal within 5 working days. Contact the Faculty Dean Office with supporting documentation.', isBase: true },
+  { id:'s013', category:'General', question:'What are Registry Services office hours?', answer:'Open Monday to Friday, 08:00 to 16:30. Email: registry@ub.bw or call +267 355 0000.', isBase: true },
+  { id:'s014', category:'General', question:'How long does it take to process a request?', answer:'Add/Drop: 3–5 working days. Extra credits: 5–7 working days. Programme change: up to 15 working days.', isBase: true }
+];
+
+// ── Storage ───────────────────────────────────────────────
+function getCustomFaqs()  { try{ return JSON.parse(sessionStorage.getItem('ub_custom_faqs') || '[]'); }  catch(e){ return []; } }
+function saveCustomFaqs(a){ sessionStorage.setItem('ub_custom_faqs', JSON.stringify(a)); }
+function getSubmitted()   { try{ return JSON.parse(sessionStorage.getItem('ub_submitted_faqs') || '[]'); } catch(e){ return []; } }
+function saveSubmitted(a) { sessionStorage.setItem('ub_submitted_faqs', JSON.stringify(a)); }
+
+function getAllFaqs() { return BASE_FAQS.concat(getCustomFaqs()); }
+
+// ── Tab switch ────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('tab-manage').classList.toggle('active',    tab === 'manage');
+  document.getElementById('tab-submitted').classList.toggle('active', tab === 'submitted');
+  document.getElementById('panel-manage').classList.toggle('active',    tab === 'manage');
+  document.getElementById('panel-submitted').classList.toggle('active', tab === 'submitted');
+  if (tab === 'submitted') renderSubmitted();
+}
+
+// ── Custom category toggle ────────────────────────────────
+document.getElementById('newCat').addEventListener('change', function() {
+  document.getElementById('customCatRow').style.display = this.value === '__custom__' ? 'block' : 'none';
+});
+
+// ── Add FAQ ───────────────────────────────────────────────
+function addFaq() {
+  var catEl  = document.getElementById('newCat');
+  var cat    = catEl.value === '__custom__' ? document.getElementById('customCat').value.trim() : catEl.value;
+  var q      = document.getElementById('newQ').value.trim();
+  var a      = document.getElementById('newA').value.trim();
+
+  if (!cat) { showToast('Please enter a category.'); return; }
+  if (!q)   { showToast('Please enter a question.'); return; }
+  if (!a)   { showToast('Please enter an answer.'); return; }
+
+  var custom = getCustomFaqs();
+  custom.push({ id: 'C' + Date.now(), category: cat, question: q, answer: a, isNew: true });
+  saveCustomFaqs(custom);
+
+  // Reset form
+  document.getElementById('newQ').value = '';
+  document.getElementById('newA').value = '';
+  document.getElementById('newCat').value = 'Course Registration';
+  document.getElementById('customCatRow').style.display = 'none';
+
+  renderFaqList();
+  showToast('FAQ entry added successfully.');
+}
+
+// ── Edit FAQ (custom only) ────────────────────────────────
+var editingId = null;
+
+function startEdit(id) {
+  var custom = getCustomFaqs();
+  var faq = custom.find(function(f){ return f.id === id; });
+  if (!faq) return;
+
+  editingId = id;
+  document.getElementById('newCat').value = 'General'; // fallback
+  document.getElementById('newQ').value = faq.question;
+  document.getElementById('newA').value = faq.answer;
+
+  var formTitle = document.querySelector('#addForm .faq-form-title');
+  formTitle.textContent = 'Edit FAQ Entry';
+  var saveBtn = document.querySelector('#addForm .btn-save');
+  saveBtn.textContent = 'Save Changes';
+  saveBtn.onclick = saveEdit;
+
+  // Show cancel
+  var actions = document.querySelector('#addForm .form-actions');
+  var existing = document.getElementById('cancelEditBtn');
+  if (!existing) {
+    var cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-cancel';
+    cancelBtn.id = 'cancelEditBtn';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.onclick = cancelEdit;
+    actions.appendChild(cancelBtn);
+  }
+
+  document.getElementById('addForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function saveEdit() {
+  if (!editingId) return;
+  var catEl = document.getElementById('newCat');
+  var cat   = catEl.value === '__custom__' ? document.getElementById('customCat').value.trim() : catEl.value;
+  var q     = document.getElementById('newQ').value.trim();
+  var a     = document.getElementById('newA').value.trim();
+
+  if (!q || !a) { showToast('Question and answer cannot be empty.'); return; }
+
+  var custom = getCustomFaqs();
+  var faq = custom.find(function(f){ return f.id === editingId; });
+  if (faq) { faq.question = q; faq.answer = a; faq.category = cat || faq.category; }
+  saveCustomFaqs(custom);
+  cancelEdit();
+  renderFaqList();
+  showToast('FAQ entry updated.');
+}
+
+function cancelEdit() {
+  editingId = null;
+  document.getElementById('newQ').value = '';
+  document.getElementById('newA').value = '';
+  document.querySelector('#addForm .faq-form-title').textContent = 'Add New FAQ Entry';
+  var saveBtn = document.querySelector('#addForm .btn-save');
+  saveBtn.textContent = 'Add to FAQ';
+  saveBtn.onclick = addFaq;
+  var cancelBtn = document.getElementById('cancelEditBtn');
+  if (cancelBtn) cancelBtn.remove();
+}
+
+// ── Delete FAQ (custom only) ──────────────────────────────
+function deleteFaq(id) {
+  if (!confirm('Delete this FAQ entry? This cannot be undone.')) return;
+  var custom = getCustomFaqs().filter(function(f){ return f.id !== id; });
+  saveCustomFaqs(custom);
+  renderFaqList();
+  showToast('FAQ entry deleted.');
+}
+
+// ── Render FAQ list ───────────────────────────────────────
+function renderFaqList() {
+  var all = getAllFaqs();
+  var el  = document.getElementById('faqList');
+  document.getElementById('faqCount').textContent = all.length + ' entries';
+  el.innerHTML = '';
+
+  // Group by category
+  var categories = [];
+  var grouped = {};
+  all.forEach(function(faq) {
+    if (!grouped[faq.category]) { grouped[faq.category] = []; categories.push(faq.category); }
+    grouped[faq.category].push(faq);
+  });
+  // Dedupe categories
+  categories = categories.filter(function(c, i){ return categories.indexOf(c) === i; });
+
+  categories.forEach(function(cat) {
+    // Category header
+    var header = document.createElement('div');
+    header.style.cssText = 'font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:var(--g400);margin:18px 0 8px;';
+    header.textContent = cat;
+    el.appendChild(header);
+
+    grouped[cat].forEach(function(faq) {
+      var item = document.createElement('div');
+      item.className = 'faq-mgmt-item';
+
+      var actionsHTML = faq.isBase
+        ? '<div style="font-size:11px;color:var(--g400);text-align:right;padding-top:2px;">Base entry<br><span style="font-style:italic;">read-only</span></div>'
+        : '<div class="faq-mgmt-actions">' +
+            '<button class="btn-edit" onclick="startEdit(\'' + faq.id + '\')">Edit</button>' +
+            '<button class="btn-del"  onclick="deleteFaq(\'' + faq.id + '\')">Delete</button>' +
+          '</div>';
+
+      item.innerHTML =
+        '<div class="faq-mgmt-body">' +
+          '<div class="faq-mgmt-q">' + faq.question + '</div>' +
+          '<div class="faq-mgmt-a">' + faq.answer + '</div>' +
+          '<div class="faq-mgmt-meta">' +
+            '<span class="faq-cat-badge' + (faq.isNew ? ' new' : '') + '">' + (faq.isNew ? 'New &mdash; ' : '') + faq.category + '</span>' +
+          '</div>' +
+        '</div>' +
+        actionsHTML;
+
+      el.appendChild(item);
+    });
+  });
+}
+
+// ── Render submitted questions ────────────────────────────
+function renderSubmitted() {
+  var list = getSubmitted();
+  var pending = list.filter(function(q){ return q.status === 'pending'; });
+  var badge = document.getElementById('pendingBadge');
+  badge.textContent = pending.length;
+  badge.style.display = pending.length ? '' : 'none';
+
+  var el = document.getElementById('submittedList');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><strong>No submitted questions yet</strong><p>When students cannot find a satisfactory answer, they can submit their question here for review.</p></div>';
+    return;
+  }
+
+  el.innerHTML = '';
+  // Pending first
+  var sorted = list.slice().sort(function(a, b){ return (a.status==='pending'?0:1) - (b.status==='pending'?0:1); });
+
+  sorted.forEach(function(q) {
+    var card = document.createElement('div');
+    card.className = 'sq-card' + (q.status !== 'pending' ? ' ' + q.status : '');
+    card.id = 'sqcard-' + q.id;
+
+    var bodyHTML = '<div class="sq-question">' + q.question + '</div>' +
+                   '<div class="sq-meta">Submitted by ' + q.submittedBy + ' &middot; ' + q.date + '</div>';
+
+    if (q.status === 'pending') {
+      bodyHTML +=
+        '<div class="sq-inline-form" id="sqform-' + q.id + '">' +
+          '<div class="form-row" style="margin-bottom:10px;">' +
+            '<label style="font-size:11px;font-weight:bold;color:var(--g600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Official Answer</label>' +
+            '<textarea class="sq-answer-input" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:7px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--navy);resize:vertical;min-height:70px;outline:none;" id="sqans-' + q.id + '" placeholder="Write an official answer..."></textarea>' +
+          '</div>' +
+          '<div class="form-row" style="margin-bottom:10px;">' +
+            '<label style="font-size:11px;font-weight:bold;color:var(--g600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Category</label>' +
+            '<select style="width:100%;padding:9px 12px;border:1.5px solid var(--g200);border-radius:7px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--navy);outline:none;background:white;" id="sqcat-' + q.id + '">' +
+              '<option>Course Registration</option><option>Credit Load</option><option>Programme Changes</option><option selected>General</option>' +
+            '</select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="sq-actions" id="sqactions-' + q.id + '">' +
+          '<button class="btn-approve" onclick="showSqForm(\'' + q.id + '\')">Write Answer</button>' +
+          '<button class="btn-dismiss" onclick="dismissQ(\'' + q.id + '\')">Dismiss</button>' +
+        '</div>' +
+        '<div class="sq-actions" id="sqconfirm-' + q.id + '" style="display:none;">' +
+          '<button class="btn-approve" onclick="approveQ(\'' + q.id + '\')">Approve &amp; Add to FAQ</button>' +
+          '<button class="btn-dismiss" onclick="hideSqForm(\'' + q.id + '\')">Cancel</button>' +
+        '</div>';
+    } else if (q.status === 'approved') {
+      bodyHTML += '<div class="sq-approved-answer">' + q.answer + '</div>' +
+                  '<div class="sq-actions"><span class="sq-status-pill approved">Approved &amp; added to FAQ</span></div>';
+    } else {
+      bodyHTML += '<div class="sq-actions"><span class="sq-status-pill dismissed">Dismissed</span></div>';
+    }
+
+    card.innerHTML = bodyHTML;
+    el.appendChild(card);
+  });
+}
+
+function showSqForm(id) {
+  document.getElementById('sqform-' + id).classList.add('visible');
+  document.getElementById('sqactions-' + id).style.display = 'none';
+  document.getElementById('sqconfirm-' + id).style.display = 'flex';
+}
+function hideSqForm(id) {
+  document.getElementById('sqform-' + id).classList.remove('visible');
+  document.getElementById('sqactions-' + id).style.display = 'flex';
+  document.getElementById('sqconfirm-' + id).style.display = 'none';
+}
+
+function approveQ(id) {
+  var answer = document.getElementById('sqans-' + id).value.trim();
+  var cat    = document.getElementById('sqcat-' + id).value;
+  if (!answer) { showToast('Please write an official answer before approving.'); return; }
+
+  var submitted = getSubmitted();
+  var q = submitted.find(function(s){ return s.id === id; });
+  if (!q) return;
+  q.status = 'approved';
+  q.answer = answer;
+  q.category = cat;
+  saveSubmitted(submitted);
+
+  // Add to custom FAQs so it appears in the knowledge base
+  var custom = getCustomFaqs();
+  custom.push({ id: 'SQ-' + id, category: cat, question: q.question, answer: answer, isNew: true });
+  saveCustomFaqs(custom);
+
+  renderSubmitted();
+  showToast('Question approved and added to FAQ knowledge base.');
+}
+
+function dismissQ(id) {
+  var submitted = getSubmitted();
+  var q = submitted.find(function(s){ return s.id === id; });
+  if (q) { q.status = 'dismissed'; saveSubmitted(submitted); }
+  renderSubmitted();
+  showToast('Question dismissed.');
+}
+
+// ── Toast ─────────────────────────────────────────────────
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 3000);
+}
+
+// ── Init ──────────────────────────────────────────────────
+renderFaqList();
+
+// Update pending badge on load
+var pending = getSubmitted().filter(function(q){ return q.status === 'pending'; });
+if (pending.length) {
+  document.getElementById('pendingBadge').textContent = pending.length;
+  document.getElementById('pendingBadge').style.display = '';
+}
+</script>
+</body>
+</html>

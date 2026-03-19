@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - Add a Course</title>
+<link rel="stylesheet" href="style.css">
+<script src="shared.js"></script>
+<style>
+.ub-form-card{background:var(--white);border:1.5px solid var(--g200);border-radius:12px;padding:32px 36px;margin-top:24px}
+.ub-form-header{text-align:center;border-bottom:2px solid var(--navy);padding-bottom:16px;margin-bottom:28px}
+.ub-form-header h3{font-size:17px;font-weight:bold;color:var(--navy);margin:0 0 2px 0;text-transform:uppercase;letter-spacing:.5px}
+.ub-form-header .form-title{font-size:20px;font-weight:bold;color:var(--navy);margin-top:10px}
+.fsec{font-size:13px;font-weight:bold;color:var(--navy);text-decoration:underline;margin:22px 0 12px 0}
+.frow{display:flex;gap:16px;margin-bottom:14px;align-items:flex-end}
+.fi{display:flex;flex-direction:column;flex:1}
+.fi label{font-size:11px;font-weight:bold;color:var(--g600);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.fi input,.fi select,.fi textarea{border:none;border-bottom:1.5px solid var(--g400);border-radius:0;padding:6px 4px;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;color:var(--navy);background:transparent;outline:none;width:100%}
+.fi input:focus,.fi select:focus,.fi textarea:focus{border-bottom-color:var(--gold);background:#fffdf0}
+.fi textarea{resize:vertical;min-height:70px}
+.identity-banner{background:var(--g100);border:1.5px solid var(--g200);border-radius:8px;padding:14px 18px;margin-bottom:18px;display:flex;gap:32px;flex-wrap:wrap}
+.identity-banner .ib-field{display:flex;flex-direction:column;gap:3px}
+.identity-banner .ib-label{font-size:10px;font-weight:bold;color:var(--g400);text-transform:uppercase;letter-spacing:.5px}
+.identity-banner .ib-value{font-size:14px;font-weight:bold;color:var(--navy)}
+.ctable{width:100%;border-collapse:collapse;margin:12px 0 16px 0;font-size:13px}
+.ctable th{background:var(--navy);color:var(--white);padding:8px 10px;text-align:left;font-size:12px;font-weight:bold}
+.ctable td{padding:4px 6px;border:1px solid var(--g200);vertical-align:middle}
+.ctable td:first-child{text-align:center;font-weight:bold;color:var(--g400);background:var(--g100);font-size:12px;width:36px}
+.ctable td input{border:none;background:transparent;width:100%;padding:5px 4px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--navy);outline:none}
+.ctable td input:focus{background:#fffdf0}
+.ctable tr.trow td{background:var(--g100);font-weight:bold;font-size:12px;color:var(--navy);padding:6px 10px}
+.tc-row{margin:8px 0 16px 0;font-size:13.5px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:12px}
+.tc-row input{border:none;border-bottom:1.5px solid var(--navy);width:80px;padding:4px;font-size:13.5px;font-weight:bold;color:var(--navy);text-align:center;background:transparent;outline:none}
+.sig-row{display:flex;gap:24px;margin-top:20px}
+.sig-f{flex:1}
+.sig-f label{font-size:11px;font-weight:bold;color:var(--g600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px}
+.sig-f input{width:100%;border:none;border-bottom:1.5px solid var(--g400);padding:6px 4px;font-size:13.5px;font-family:Arial,Helvetica,sans-serif;color:var(--navy);background:transparent;outline:none}
+.sig-f input:focus{border-bottom-color:var(--gold)}
+.upload-area{border:2px dashed var(--g400);border-radius:10px;padding:24px 20px;margin-top:8px;text-align:center;background:var(--g100);cursor:pointer;transition:border-color .2s}
+.upload-area:hover{border-color:var(--gold);background:#fffdf0}
+.upload-area .ua-icon{font-size:28px;margin-bottom:8px}
+.upload-area .ua-label{font-size:13.5px;font-weight:bold;color:var(--navy);margin-bottom:4px}
+.upload-area .ua-hint{font-size:12px;color:var(--g400)}
+.upload-area input[type=file]{display:none}
+.approval-block{border:1.5px solid var(--gold);border-radius:8px;padding:18px 20px;margin-top:10px;background:#fffdf0}
+.approval-block .ab-title{font-size:12px;font-weight:bold;color:var(--navy);margin-bottom:14px;text-transform:uppercase;letter-spacing:.4px}
+.stamp-box{border:1.5px dashed var(--g400);border-radius:6px;height:70px;margin-top:10px;background:var(--white)}
+.notes-box{background:var(--g100);border-left:3px solid var(--navy);border-radius:0 8px 8px 0;padding:14px 18px;margin-top:24px}
+.notes-box p{font-size:12px;font-weight:bold;color:var(--navy);margin:0 0 8px 0}
+.notes-box ol{margin:0;padding-left:18px}
+.notes-box ol li{font-size:12.5px;color:var(--g600);margin-bottom:5px;line-height:1.5}
+.notes-box ol li strong{color:var(--navy)}
+.btn-sf{width:100%;margin-top:24px;padding:13px;background:var(--navy);color:var(--gold);border:none;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;cursor:pointer}
+.btn-sf:hover{opacity:.92}
+.btn-sf:disabled{opacity:.5;cursor:not-allowed}
+.fmsg{display:none;margin-top:14px;padding:12px 16px;border-radius:8px;font-size:13.5px;font-weight:bold}
+.fmsg.success{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.fmsg.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+</style>
+</head>
+<body>
+<script>
+var user = getUser();
+if (!user) { window.location.href = 'index.html'; }
+
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('topbar-name');
+  if (el) el.textContent = user ? user.name : '';
+
+  if (user) {
+    document.getElementById('ib_name').textContent = user.name || '—';
+    document.getElementById('ib_id').textContent   = user.id   || '—';
+  }
+  var fd = document.getElementById('f_date');
+  if (fd) fd.value = new Date().toISOString().split('T')[0];
+
+  var isAdmin = user && user.role === 'admin';
+  document.getElementById('admin-approval-section').style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('student-upload-section').style.display = isAdmin ? 'none'  : 'block';
+  if (isAdmin) document.getElementById('addSubmitBtn').textContent = 'Save Form on Behalf of Student';
+});
+</script>
+
+<div class="topbar">
+  <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
+  <span class="topbar-user" id="topbar-name"></span>
+  <a href="index.html" class="topbar-logout" onclick="doLogout();return false;">Log out</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section"><div class="sb-label">Overview</div><a href="student-dashboard.html" class="sb-link">Dashboard</a></div>
+    <div class="sb-section"><div class="sb-label">Submit Request</div>
+      <a href="student-credits.html" class="sb-link">Extra Credits</a>
+      <a href="student-addcourse.html" class="sb-link active">Add a Course</a>
+      <a href="student-dropcourse.html" class="sb-link">Drop a Course</a>
+      <a href="student-program.html" class="sb-link">Change Program</a>
+    </div>
+    <div class="sb-section"><div class="sb-label">My Requests</div>
+      <a href="student-pending.html" class="sb-link">Pending</a>
+      <a href="student-approved.html" class="sb-link">Approved</a>
+      <a href="student-denied.html" class="sb-link">Denied</a>
+    </div>
+    <div class="sb-section"><div class="sb-label">Help</div><a href="student-faq.html" class="sb-link">FAQs</a></div>
+  </div>
+
+  <div class="main">
+    <div class="ph">
+      <h2>Add a Course</h2>
+      <p>Complete and submit the Faculty of Science Add Form below</p>
+    </div>
+
+    <div class="two-col" style="margin-bottom:0;">
+      <div>
+        <div class="card">
+          <div class="card-title">About This Service</div>
+          <p style="font-size:13.5px;color:var(--g600);line-height:1.7;margin-bottom:14px;">You may request to add a course to your current semester registration. This is subject to seat availability, prerequisite completion, and timetable compatibility.</p>
+          <div class="ibox warn"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Requirements</div>
+          <div class="req-list-items">
+            <div class="req-item"><div class="req-num">1</div><div class="req-text">Request submitted within the first 2 weeks of semester</div></div>
+            <div class="req-item"><div class="req-num">2</div><div class="req-text">Completion of any listed prerequisites</div></div>
+            <div class="req-item"><div class="req-num">3</div><div class="req-text">No timetable clashes with existing courses</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">How It Works</div>
+          <div class="step-list">
+            <div class="step-row"><div class="step-num">1</div><div class="step-text">Your details are pre-filled from your login — just complete the form</div></div>
+            <div class="step-row"><div class="step-num">2</div><div class="step-text">List each course you wish to add with its credit value</div></div>
+            <div class="step-row"><div class="step-num">3</div><div class="step-text">Enter your total credits after the addition</div></div>
+            <div class="step-row"><div class="step-num">4</div><div class="step-text">Submit &mdash; Registry processes within 3&ndash;5 working days</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Contact</div>
+          <div class="ibox info">Registry Services Office &mdash; location to be updated</div>
+          <div class="ibox info">Email: to be updated</div>
+          <div class="ibox info">Office hours: to be updated</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OFFICIAL ADD FORM -->
+    <div class="ub-form-card">
+      <div class="ub-form-header">
+        <h3>University of Botswana &mdash; Faculty of Science</h3>
+        <div class="form-title">Add Form</div>
+      </div>
+
+      <!-- Identity banner -->
+      <div class="fsec">Student Details</div>
+      <div class="identity-banner">
+        <div class="ib-field"><div class="ib-label">Full Name</div><div class="ib-value" id="ib_name">—</div></div>
+        <div class="ib-field"><div class="ib-label">Student No</div><div class="ib-value" id="ib_id">—</div></div>
+      </div>
+
+      <!-- Additional fields -->
+      <div class="frow">
+        <div class="fi"><label>Programme *</label><input type="text" id="f_programme" placeholder="e.g. BSc Computer Science" required></div>
+        <div class="fi" style="max-width:160px;"><label>Year of Study</label><input type="number" id="f_year" placeholder="e.g. 2" min="1" max="6"></div>
+      </div>
+      <div class="frow">
+        <div class="fi" style="max-width:200px;"><label>Contact No</label><input type="tel" id="f_contact" placeholder="+267 7X XXX XXX"></div>
+      </div>
+
+      <!-- Courses table -->
+      <div class="fsec" style="margin-top:20px;">List the Courses to be Added</div>
+      <table class="ctable">
+        <thead>
+          <tr><th style="width:36px;"></th><th>Course Code</th><th style="width:140px;">Credits</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><input type="text" id="ac1_code" placeholder="e.g. CS401"></td><td><input type="number" id="ac1_cred" placeholder="3" min="1" max="6"></td></tr>
+          <tr><td>2</td><td><input type="text" id="ac2_code"></td><td><input type="number" id="ac2_cred" min="1" max="6"></td></tr>
+          <tr><td>3</td><td><input type="text" id="ac3_code"></td><td><input type="number" id="ac3_cred" min="1" max="6"></td></tr>
+          <tr class="trow"><td colspan="2">Total Credits Added:</td><td id="add_total_display">0</td></tr>
+        </tbody>
+      </table>
+
+      <div class="tc-row">Total Credits after the change: <input type="number" id="f_credits_after" placeholder="0" min="0" max="21"></div>
+
+      <div class="frow" style="margin-top:6px;">
+        <div class="fi"><label>Reason for Addition *</label><textarea id="f_reason" placeholder="Briefly explain why you need to add this course (e.g. prerequisite for final year project, graduation requirement)" required></textarea></div>
+      </div>
+
+      <div class="sig-row">
+        <div class="sig-f"><label>Signature (type full name to confirm) *</label><input type="text" id="f_signature" placeholder="Type your full name" required></div>
+        <div class="sig-f" style="max-width:180px;"><label>Date</label><input type="date" id="f_date" readonly></div>
+      </div>
+
+      <!-- ── STUDENT: Document Upload ── -->
+      <div id="student-upload-section">
+        <div class="fsec" style="margin-top:28px;">Supporting Documents</div>
+        <p style="font-size:13px;color:var(--g600);margin-bottom:10px;">Upload any supporting documents (e.g. advisor approval, prerequisite evidence). PDF, JPG or PNG accepted.</p>
+        <label class="upload-area" for="upload_supporting">
+          <div class="ua-icon">📎</div>
+          <div class="ua-label">Click to upload supporting documents</div>
+          <div class="ua-hint">PDF, JPG, PNG &mdash; max 5 MB per file</div>
+          <input type="file" id="upload_supporting" multiple accept=".pdf,.jpg,.jpeg,.png">
+        </label>
+      </div>
+
+      <!-- ── ADMIN ONLY: Approval Signature ── -->
+      <div id="admin-approval-section" style="display:none;">
+        <div class="fsec" style="margin-top:28px;">Approval</div>
+        <div class="approval-block">
+          <div class="ab-title">Approval</div>
+          <div class="sig-row">
+            <div class="sig-f"><label>Signature</label><input type="text" id="f_approval_sig"></div>
+            <div class="sig-f" style="max-width:180px;"><label>Date</label><input type="date" id="f_approval_date"></div>
+          </div>
+          <div class="stamp-box"></div>
+        </div>
+      </div>
+
+      <div class="notes-box">
+        <p>NB:</p>
+        <ol>
+          <li>This is <strong>NOT</strong> a registration form as students are expected to self-enrol online.</li>
+          <li>This form is to be used by <strong>only</strong> those students wishing to take more than 64 credits.</li>
+          <li>Filling out this form does <strong>not</strong> guarantee that you will be enrolled.</li>
+          <li>It is the responsibility of the student to check that the requested addition has been made.</li>
+        </ol>
+      </div>
+
+      <button class="btn-sf" id="addSubmitBtn" onclick="submitAddForm()">Submit Add Course Request</button>
+      <div class="fmsg" id="addFormMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+['ac1_cred','ac2_cred','ac3_cred'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', calcAddTotal);
+});
+function calcAddTotal(){
+  var t=['ac1_cred','ac2_cred','ac3_cred'].reduce(function(s,id){return s+(parseInt(document.getElementById(id).value)||0);},0);
+  document.getElementById('add_total_display').textContent=t;
+}
+async function submitAddForm(){
+  var reason=document.getElementById('f_reason').value.trim();
+  var signature=document.getElementById('f_signature').value.trim();
+  if(!reason||!signature){showMsg('add','error','Please fill in all required fields (Reason, Signature).');return;}
+  var courses=[];
+  for(var i=1;i<=3;i++){
+    var code=document.getElementById('ac'+i+'_code').value.trim();
+    if(code) courses.push({course_code:code,credits:document.getElementById('ac'+i+'_cred').value});
+  }
+  if(!courses.length){showMsg('add','error','Please enter at least one course to add.');return;}
+  var subject='Add Course — '+courses.map(function(c){return c.course_code;}).join(', ');
+  var btn=document.getElementById('addSubmitBtn');
+  btn.disabled=true;btn.textContent='Submitting…';
+  try{
+    var res=await apiFetch('/api/requests',{method:'POST',body:JSON.stringify({
+      request_type:'add_course',subject:subject,reason:reason,
+      course_code:courses.map(function(c){return c.course_code;}).join(', '),
+      course_name:courses.map(function(c){return c.course_code;}).join(', '),
+      form_data:JSON.stringify({name:user.name,student_id:user.id,programme:document.getElementById('f_programme').value.trim(),year_of_study:document.getElementById('f_year').value,contact:document.getElementById('f_contact').value.trim(),signature:signature,credits_after:document.getElementById('f_credits_after').value,courses:courses})
+    })});
+    var data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Submission failed');
+    showMsg('add','success','Add course request submitted! Reference: '+data.request.ref_number+'. Track it under My Requests \u2192 Pending.');
+    btn.textContent='Submitted \u2713';
+  }catch(err){
+    showMsg('add','error',err.message||'Could not submit. Please try again.');
+    btn.disabled=false;btn.textContent='Submit Add Course Request';
+  }
+}
+function showMsg(f,type,text){var el=document.getElementById(f+'FormMsg');el.textContent=text;el.className='fmsg '+type;el.style.display='block';el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+</script>
+</body>
+</html>

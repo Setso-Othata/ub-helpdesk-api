@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - Denied Requests</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
+  <span class="topbar-user" id="topbar-name"></span>
+  <a href="index.html" class="topbar-logout">Log out</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Overview</div>
+      <a href="student-dashboard.html" class="sb-link">Dashboard</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Submit Request</div>
+      <a href="student-credits.html" class="sb-link">Extra Credits</a>
+      <a href="student-addcourse.html" class="sb-link">Add a Course</a>
+      <a href="student-dropcourse.html" class="sb-link">Drop a Course</a>
+      <a href="student-program.html" class="sb-link">Change Program</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">My Requests</div>
+      <a href="student-pending.html" class="sb-link">Pending</a>
+      <a href="student-approved.html" class="sb-link">Approved</a>
+      <a href="student-denied.html" class="sb-link active">Denied</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Help</div>
+      <a href="student-faq.html" class="sb-link">FAQs</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="ph">
+      <h2>Denied Requests</h2>
+      <p>1 request denied</p>
+    </div>
+
+    <div class="ibox err" style="margin-bottom:16px;">These requests were not approved. Review the admin note and consider resubmitting with additional documentation.</div>
+
+    <div class="rcard denied">
+      <div class="r-body">
+        <div class="r-title">Drop Course &mdash; MATH202 Linear Algebra</div>
+        <div class="r-meta">20 Dec 2025 &nbsp;&middot;&nbsp; REQ0003</div>
+        <div class="r-reason">Unavoidable timetable clash with mandatory CS302 lab. I plan to register for MATH202 again in Semester 1 next year.</div>
+        <div class="r-note err">Admin: MATH202 is a core requirement. A timetable exemption must first be obtained from your Faculty.</div>
+      </div>
+      <div class="r-right">
+        <span class="tbadge tbd">Drop a Course</span>
+        <span class="sp sp-denied">Denied</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  var u = requireStudent();
+  if (u) document.getElementById('topbar-name').textContent = u.name;
+</script>
+</body>
+</html>

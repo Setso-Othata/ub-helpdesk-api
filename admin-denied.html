@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - Denied Requests</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
+  <span class="topbar-user" id="topbar-name"></span>
+  <div class="bell-wrap">
+    <a href="admin-pending.html" class="bell-btn">Alerts</a>
+    <span class="bell-count">2</span>
+  </div>
+  <a href="index.html" class="topbar-logout">Log out</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Overview</div>
+      <a href="admin-dashboard.html" class="sb-link">Dashboard</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Requests</div>
+      <a href="admin-pending.html" class="sb-link">Pending</a>
+      <a href="admin-approved.html" class="sb-link">Approved</a>
+      <a href="admin-denied.html" class="sb-link active">Denied</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Analytics</div>
+      <a href="admin-report.html" class="sb-link">Reports</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Help</div>
+      <a href="admin-faq.html" class="sb-link">FAQs</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="ph">
+      <h2>Denied Requests</h2>
+      <p>1 request denied</p>
+    </div>
+
+    <div class="rcard denied">
+      <div class="r-body">
+        <div class="r-title">Drop Course &mdash; MATH202 Linear Algebra</div>
+        <div class="r-meta"><strong>Tebogo Kgosi</strong> &nbsp;&middot;&nbsp; UB23050002 &nbsp;&middot;&nbsp; 20 Dec 2025 &nbsp;&middot;&nbsp; REQ0003</div>
+        <div class="r-reason">Unavoidable timetable clash with mandatory CS302 lab. I plan to register for MATH202 again in Semester 1 next year.</div>
+        <div class="r-note err">Decision note: MATH202 is a core requirement. A timetable exemption must first be obtained from your Faculty.</div>
+      </div>
+      <div class="r-right">
+        <span class="tbadge tbd">Drop a Course</span>
+        <span class="sp sp-denied">Denied</span>
+        <div class="by-note">By Dr. Ruth Sebele<br>21 Dec 2025</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  var u = requireAdmin();
+  if (u) document.getElementById('topbar-name').textContent = u.name;
+</script>
+</body>
+</html>

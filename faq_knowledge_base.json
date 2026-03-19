@@ -1,0 +1,149 @@
+[
+  {
+    "id": "s001",
+    "category": "Course Registration",
+    "audience": "student",
+    "question": "How do I add a course to my registration?",
+    "answer": "Navigate to the Add a Course service page from the sidebar. Review the requirements and visit the Registry Services Office with your request. Additions are only permitted within the first two weeks of semester. You will need to confirm there are no timetable clashes and that you have completed any listed prerequisites."
+  },
+  {
+    "id": "s002",
+    "category": "Course Registration",
+    "audience": "student",
+    "question": "Can I drop a course after the semester has started?",
+    "answer": "Yes. Drops within Weeks 1 to 2 leave no academic record and may be eligible for a partial refund. Drops in Weeks 3 to 4 may have financial implications. After Week 4, a W (Withdrawal) grade is recorded on your transcript. Dropping below 12 credits may also affect your full-time status and financial aid."
+  },
+  {
+    "id": "s003",
+    "category": "Course Registration",
+    "audience": "student",
+    "question": "What happens to my fees if I drop a course?",
+    "answer": "If you drop within the first two weeks, you may be eligible for a partial refund. After that period, the full tuition for the course remains payable. Contact the Finance Office for your specific situation. Late drops after Week 4 incur no additional fee but no refund is given."
+  },
+  {
+    "id": "s004",
+    "category": "Course Registration",
+    "audience": "student",
+    "question": "What is the deadline to add or drop a course?",
+    "answer": "Course additions close at the end of Week 2 of semester. Drops without financial penalty also close at the end of Week 2. Drops between Weeks 3 and 4 may incur partial charges. After Week 4, a Withdrawal grade is recorded. These deadlines are strictly enforced by the Registry."
+  },
+  {
+    "id": "s005",
+    "category": "Credit Load",
+    "audience": "student",
+    "question": "What is the standard credit allocation per semester?",
+    "answer": "The standard allocation is 18 credits per semester. This is the default load for all registered students. Taking more than 18 credits requires a formal Extra Credits request, subject to a minimum CGPA of 3.0 and approval from the Registry."
+  },
+  {
+    "id": "s006",
+    "category": "Credit Load",
+    "audience": "student",
+    "question": "What CGPA do I need to apply for extra credits?",
+    "answer": "A minimum Cumulative Grade Point Average (CGPA) of 3.0 is required to apply for an extra credit load. Students on academic probation are not eligible. You will also need a valid academic reason such as graduation requirements or course dependencies."
+  },
+  {
+    "id": "s007",
+    "category": "Credit Load",
+    "audience": "student",
+    "question": "How many extra credits can I take?",
+    "answer": "The Registry reviews each request individually. The maximum overload permitted is typically 21 credits (3 extra credits above the standard 18). Requests beyond 21 credits require exceptional circumstances and Dean approval. Your CGPA must be 3.0 or above."
+  },
+  {
+    "id": "s008",
+    "category": "Programme Changes",
+    "audience": "student",
+    "question": "How long does a programme change take to process?",
+    "answer": "Programme change requests take up to 15 working days to process after submission. This allows time for both your current and target faculty to review the application. You should plan ahead and not wait until semester start."
+  },
+  {
+    "id": "s009",
+    "category": "Programme Changes",
+    "audience": "student",
+    "question": "Will my completed credits transfer if I change programmes?",
+    "answer": "Credits may be recognised by the receiving department at their discretion. A credit recognition assessment is conducted as part of the programme change review process. Not all credits are guaranteed to transfer, particularly if the courses are not relevant to the new programme."
+  },
+  {
+    "id": "s010",
+    "category": "Programme Changes",
+    "audience": "student",
+    "question": "What documents do I need to change my programme?",
+    "answer": "You will need a formal motivation letter explaining your reasons for the change, approval from your current Faculty, and acceptance from the receiving Faculty. Supporting academic records may also be requested. Submit everything to the Registry Services Office."
+  },
+  {
+    "id": "s011",
+    "category": "General",
+    "audience": "student",
+    "question": "How do I track the status of my request?",
+    "answer": "You can track your request under My Requests in the sidebar. Requests are listed under Pending, Approved, or Denied with full details and any admin notes. You will see the date submitted, the request ID, your reason, and any decision note left by the Registry."
+  },
+  {
+    "id": "s012",
+    "category": "General",
+    "audience": "student",
+    "question": "Who do I contact if my request is denied?",
+    "answer": "If your request is denied, you have the right to appeal within 5 working days. Contact the Faculty Dean's Office with additional supporting documentation and a written motivation. The Registry's decision note on your denied request will explain the reason, which you should address in your appeal."
+  },
+  {
+    "id": "s013",
+    "category": "General",
+    "audience": "student",
+    "question": "What are Registry Services office hours?",
+    "answer": "The Registry Services Office is open Monday to Friday, 08:00 to 16:30. The office is located in the Student Affairs Building on Main Campus, Gaborone. You can also email registry@ub.bw or call +267 355 0000."
+  },
+  {
+    "id": "s014",
+    "category": "General",
+    "audience": "student",
+    "question": "How long does it take to process a request?",
+    "answer": "Processing times vary by request type. Add or drop a course requests take 3 to 5 working days. Extra credit load requests take 5 to 7 working days. Programme change requests take up to 15 working days. You can check the status at any time under My Requests."
+  },
+  {
+    "id": "a001",
+    "category": "Managing Requests",
+    "audience": "admin",
+    "question": "How do I approve or deny a student request?",
+    "answer": "Navigate to Pending Requests from the sidebar. Each request card shows the student's details, reason, and request type. Use the Approve or Deny buttons to action each request. You can add a decision note that will be visible to the student explaining the outcome."
+  },
+  {
+    "id": "a002",
+    "category": "Managing Requests",
+    "audience": "admin",
+    "question": "Can I add a note when approving or denying a request?",
+    "answer": "Yes. When actioning a pending request there is a text field for an admin decision note. This note is displayed to the student on their request card and helps them understand the outcome or next steps they should take."
+  },
+  {
+    "id": "a003",
+    "category": "Managing Requests",
+    "audience": "admin",
+    "question": "How is the alerts count calculated?",
+    "answer": "The Alerts button in the top bar shows the total number of requests currently in Pending status. This count updates each time a request is approved or denied once the backend is fully connected."
+  },
+  {
+    "id": "a004",
+    "category": "Reports",
+    "audience": "admin",
+    "question": "What does the report page show?",
+    "answer": "The Reports page shows a summary of all help desk activity including total requests, pending, approved, and denied counts, a bar chart broken down by request type, a donut chart for status breakdown, and a full submissions table with all student requests."
+  },
+  {
+    "id": "a005",
+    "category": "Reports",
+    "audience": "admin",
+    "question": "Can I print or export the report?",
+    "answer": "Yes. Use the Print Report button at the top of the Reports page. This triggers a print-optimised view that hides navigation and formats the report cleanly for printing or saving as a PDF through your browser's print dialog."
+  },
+  {
+    "id": "a006",
+    "category": "General",
+    "audience": "admin",
+    "question": "What request types can students submit?",
+    "answer": "Students can submit four types of requests: Extra Credit Load to exceed 18 credits, Add a Course, Drop a Course, and Change Programme of Study. Each type has its own eligibility criteria and processing timeline as defined by the Registry."
+  },
+  {
+    "id": "a007",
+    "category": "General",
+    "audience": "admin",
+    "question": "How do I contact a student about their request?",
+    "answer": "Student contact details are managed through the main UB student information system. Use the student ID shown on each request card to look up contact details in the UB staff portal. You can also leave a detailed decision note on the request which the student will see."
+  }
+]

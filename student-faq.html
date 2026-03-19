@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - FAQs</title>
+<link rel="stylesheet" href="style.css">
+<script src="shared.js"></script>
+<style>
+/* ── RAG Search ─────────────────────────────────────────── */
+.rag-wrap {
+  background: var(--navy);
+  border-radius: var(--r);
+  padding: 26px 28px 22px;
+  margin-bottom: 22px;
+}
+.rag-title { font-size: 15px; font-weight: bold; color: var(--gold); margin-bottom: 4px; }
+.rag-sub   { font-size: 12.5px; color: rgba(255,255,255,0.5); margin-bottom: 18px; }
+
+.rag-key-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.rag-key-input {
+  flex: 1; padding: 9px 14px; border-radius: 7px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06); color: #fff;
+  font-family: Arial, Helvetica, sans-serif; font-size: 13px; outline: none;
+}
+.rag-key-input::placeholder { color: rgba(255,255,255,0.3); }
+.rag-key-input:focus { border-color: var(--gold); }
+.rag-key-btn {
+  padding: 9px 16px; border-radius: 7px;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8);
+  font-family: Arial, Helvetica, sans-serif; font-size: 12px; cursor: pointer;
+}
+.rag-key-btn:hover { background: rgba(255,255,255,0.14); }
+.rag-key-saved { font-size: 11px; color: #4caf50; margin-top: 4px; display: none; }
+.rag-key-saved.visible { display: block; }
+
+.rag-query-row { display: flex; gap: 8px; }
+.rag-input {
+  flex: 1; padding: 11px 16px; border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08); color: #fff;
+  font-family: Arial, Helvetica, sans-serif; font-size: 14px; outline: none;
+}
+.rag-input::placeholder { color: rgba(255,255,255,0.35); }
+.rag-input:focus { border-color: var(--gold); }
+.rag-ask-btn {
+  padding: 11px 22px; background: var(--gold); color: var(--navy); border: none;
+  border-radius: 8px; font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px; font-weight: bold; cursor: pointer;
+}
+.rag-ask-btn:hover { background: #ddb22e; }
+.rag-ask-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.rag-loading { display: none; margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.45); font-style: italic; }
+.rag-loading.on { display: flex; align-items: center; gap: 8px; }
+.rag-spinner {
+  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: var(--gold); border-radius: 50%;
+  animation: spin 0.8s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.rag-error { display: none; margin-top: 14px; padding: 11px 14px; background: rgba(192,57,43,0.18); border: 1px solid rgba(192,57,43,0.35); border-radius: 7px; font-size: 13px; color: #ff8a80; line-height: 1.55; }
+.rag-error.on { display: block; }
+
+.rag-result { display: none; margin-top: 18px; }
+.rag-result.on { display: block; }
+.rag-answer {
+  background: rgba(255,255,255,0.06); border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0; padding: 14px 18px;
+  font-size: 13.5px; color: rgba(255,255,255,0.9); line-height: 1.75; margin-bottom: 14px;
+}
+.rag-sources-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.35); margin-bottom: 7px; }
+.rag-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.rag-chip {
+  padding: 3px 10px; border-radius: 20px;
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+  font-size: 11px; color: rgba(255,255,255,0.5);
+}
+.rag-chip .chip-score { color: var(--gold); font-weight: bold; margin-left: 4px; font-size: 10px; }
+
+/* Submit to admin */
+.submit-row {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+.submit-row.visible { display: flex; }
+.submit-row p { font-size: 12.5px; color: rgba(255,255,255,0.55); flex: 1; line-height: 1.5; }
+.submit-btn {
+  padding: 8px 16px; background: transparent;
+  border: 1.5px solid var(--gold); border-radius: 7px;
+  color: var(--gold); font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap;
+}
+.submit-btn:hover { background: rgba(201,162,39,0.12); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.submit-ok { display: none; font-size: 12px; color: #4caf50; margin-top: 8px; }
+.submit-ok.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
+  <span class="topbar-user" id="topbar-name"></span>
+  <a href="index.html" class="topbar-logout">Log out</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Overview</div>
+      <a href="student-dashboard.html" class="sb-link">Dashboard</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Submit Request</div>
+      <a href="student-credits.html" class="sb-link">Extra Credits</a>
+      <a href="student-addcourse.html" class="sb-link">Add a Course</a>
+      <a href="student-dropcourse.html" class="sb-link">Drop a Course</a>
+      <a href="student-program.html" class="sb-link">Change Program</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">My Requests</div>
+      <a href="student-pending.html" class="sb-link">Pending</a>
+      <a href="student-approved.html" class="sb-link">Approved</a>
+      <a href="student-denied.html" class="sb-link">Denied</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Help</div>
+      <a href="student-faq.html" class="sb-link active">FAQs</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="ph">
+      <h2>Frequently Asked Questions</h2>
+      <p>Ask a question or browse common topics below</p>
+    </div>
+
+    <!-- RAG Search -->
+    <div class="rag-wrap">
+      <div class="rag-title">Ask a Question</div>
+      <div class="rag-sub">Type your question and get an instant AI-powered answer from our knowledge base. Enter your Anthropic API key once to activate.</div>
+
+      <div class="rag-key-row">
+        <input type="password" class="rag-key-input" id="apiKeyInput" placeholder="sk-ant-... (Anthropic API key)">
+        <button class="rag-key-btn" onclick="saveKey()">Save Key</button>
+      </div>
+      <div class="rag-key-saved" id="keySaved">&#10003; API key saved for this session</div>
+
+      <div class="rag-query-row">
+        <input type="text" class="rag-input" id="ragInput"
+          placeholder="e.g. Can I drop a course after Week 3?"
+          onkeydown="if(event.key==='Enter') askRag()" maxlength="400">
+        <button class="rag-ask-btn" id="ragBtn" onclick="askRag()">Ask</button>
+      </div>
+
+      <div class="rag-loading" id="ragLoading">
+        <div class="rag-spinner"></div>Searching knowledge base and generating answer&hellip;
+      </div>
+      <div class="rag-error" id="ragError"></div>
+
+      <div class="rag-result" id="ragResult">
+        <div class="rag-answer" id="ragAnswer"></div>
+        <div class="rag-sources-label">Sources used</div>
+        <div class="rag-chips" id="ragChips"></div>
+
+        <!-- Submit unanswered question to admin -->
+        <div class="submit-row" id="submitRow">
+          <p>Didn't get a satisfactory answer? Submit your question to the Registry — an administrator will review it and add an official answer.</p>
+          <button class="submit-btn" id="submitBtn" onclick="submitToAdmin()">Submit to Admin</button>
+        </div>
+        <div class="submit-ok" id="submitOk">&#10003; Your question has been submitted. An administrator will review it shortly.</div>
+      </div>
+    </div>
+
+    <!-- Static FAQ Accordion -->
+    <div class="card">
+      <div class="card-title">Browse All FAQs</div>
+
+      <div class="faq-cat">Course Registration</div>
+      <div class="faq-item" id="sf1"><div class="faq-q" onclick="toggleFaq('sf1')"><span>How do I add a course to my registration?</span><span class="faq-chevron">v</span></div><div class="faq-a">Navigate to "Add a Course" from the sidebar. Review the requirements and visit the Registry Services Office with your request. Additions are only permitted within the first two weeks of semester.</div></div>
+      <div class="faq-item" id="sf2"><div class="faq-q" onclick="toggleFaq('sf2')"><span>Can I drop a course after the semester has started?</span><span class="faq-chevron">v</span></div><div class="faq-a">Yes. Drops within Weeks 1&ndash;2 leave no academic record. Drops in Weeks 3&ndash;4 may have financial implications. After Week 4, a "W" (Withdrawal) grade is recorded on your transcript.</div></div>
+      <div class="faq-item" id="sf3"><div class="faq-q" onclick="toggleFaq('sf3')"><span>What happens to my fees if I drop a course?</span><span class="faq-chevron">v</span></div><div class="faq-a">If you drop within the first two weeks, you may be eligible for a partial refund. After that period, the full tuition remains payable. Contact the Finance Office for your specific situation.</div></div>
+      <div class="faq-item" id="sf3b"><div class="faq-q" onclick="toggleFaq('sf3b')"><span>What is the deadline to add or drop a course?</span><span class="faq-chevron">v</span></div><div class="faq-a">Course additions close at the end of Week 2. Drops without financial penalty also close Week 2. After Week 4, a Withdrawal grade is recorded. These deadlines are strictly enforced.</div></div>
+
+      <div class="faq-cat">Credit Load</div>
+      <div class="faq-item" id="sf4"><div class="faq-q" onclick="toggleFaq('sf4')"><span>What is the standard credit allocation per semester?</span><span class="faq-chevron">v</span></div><div class="faq-a">The standard allocation is 18 credits per semester. Taking more than 18 requires a formal Extra Credits request with a minimum CGPA of 3.0.</div></div>
+      <div class="faq-item" id="sf5"><div class="faq-q" onclick="toggleFaq('sf5')"><span>What CGPA do I need to apply for extra credits?</span><span class="faq-chevron">v</span></div><div class="faq-a">A minimum CGPA of 3.0 is required. Students on academic probation are not eligible. The maximum overload typically permitted is 21 credits.</div></div>
+
+      <div class="faq-cat">Programme Changes</div>
+      <div class="faq-item" id="sf6"><div class="faq-q" onclick="toggleFaq('sf6')"><span>How long does a programme change take to process?</span><span class="faq-chevron">v</span></div><div class="faq-a">Programme change requests take up to 15 working days to process after submission.</div></div>
+      <div class="faq-item" id="sf7"><div class="faq-q" onclick="toggleFaq('sf7')"><span>Will my completed credits transfer if I change programmes?</span><span class="faq-chevron">v</span></div><div class="faq-a">Credits may be recognised by the receiving department at their discretion. A credit recognition assessment is conducted as part of the review.</div></div>
+      <div class="faq-item" id="sf7b"><div class="faq-q" onclick="toggleFaq('sf7b')"><span>What documents do I need to change my programme?</span><span class="faq-chevron">v</span></div><div class="faq-a">You need a formal motivation letter, approval from your current Faculty, and acceptance from the receiving Faculty. Submit everything to the Registry.</div></div>
+
+      <div class="faq-cat">General</div>
+      <div class="faq-item" id="sf8"><div class="faq-q" onclick="toggleFaq('sf8')"><span>How do I track the status of my request?</span><span class="faq-chevron">v</span></div><div class="faq-a">Track requests under "My Requests" in the sidebar — listed as Pending, Approved, or Denied with full details and any admin notes.</div></div>
+      <div class="faq-item" id="sf9"><div class="faq-q" onclick="toggleFaq('sf9')"><span>Who do I contact if my request is denied?</span><span class="faq-chevron">v</span></div><div class="faq-a">You have the right to appeal within 5 working days. Contact the Faculty Dean's Office with supporting documentation and a written motivation.</div></div>
+      <div class="faq-item" id="sf10"><div class="faq-q" onclick="toggleFaq('sf10')"><span>What are Registry Services office hours?</span><span class="faq-chevron">v</span></div><div class="faq-a">Contact details to be updated.</div></div>
+      <div class="faq-item" id="sf11"><div class="faq-q" onclick="toggleFaq('sf11')"><span>How long does it take to process a request?</span><span class="faq-chevron">v</span></div><div class="faq-a">Add/Drop: 3&ndash;5 working days. Extra credits: 5&ndash;7 working days. Programme change: up to 15 working days.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Still Need Help?</div>
+      <div class="ibox info">Registry Services Office &mdash; location to be updated</div>
+      <div class="ibox info">Email: to be updated &nbsp;&middot;&nbsp; Tel: to be updated &nbsp;&middot;&nbsp; Hours: to be updated</div>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+var u = requireStudent();
+if (u) document.getElementById('topbar-name').textContent = u.name;
+
+var FAQ_KB = [
+  { id:'s001', category:'Course Registration', question:'How do I add a course to my registration?', answer:'Navigate to the Add a Course service page from the sidebar. Review the requirements and visit the Registry Services Office with your request. Additions are only permitted within the first two weeks of semester. You will need to confirm there are no timetable clashes and that you have completed any listed prerequisites.' },
+  { id:'s002', category:'Course Registration', question:'Can I drop a course after the semester has started?', answer:'Yes. Drops within Weeks 1 to 2 leave no academic record and may be eligible for a partial refund. Drops in Weeks 3 to 4 may have financial implications. After Week 4, a W (Withdrawal) grade is recorded on your transcript. Dropping below 12 credits may also affect your full-time status and financial aid.' },
+  { id:'s003', category:'Course Registration', question:'What happens to my fees if I drop a course?', answer:'If you drop within the first two weeks, you may be eligible for a partial refund. After that period, the full tuition for the course remains payable. Contact the Finance Office for your specific situation.' },
+  { id:'s004', category:'Course Registration', question:'What is the deadline to add or drop a course?', answer:'Course additions close at the end of Week 2 of semester. Drops without financial penalty also close at the end of Week 2. Drops between Weeks 3 and 4 may incur partial charges. After Week 4, a Withdrawal grade is recorded.' },
+  { id:'s005', category:'Credit Load', question:'What is the standard credit allocation per semester?', answer:'The standard allocation is 18 credits per semester. Taking more than 18 credits requires a formal Extra Credits request, subject to a minimum CGPA of 3.0 and approval from the Registry.' },
+  { id:'s006', category:'Credit Load', question:'What CGPA do I need to apply for extra credits?', answer:'A minimum Cumulative Grade Point Average (CGPA) of 3.0 is required. Students on academic probation are not eligible.' },
+  { id:'s007', category:'Credit Load', question:'How many extra credits can I take?', answer:'The maximum overload permitted is typically 21 credits (3 extra credits above the standard 18). Requests beyond 21 credits require exceptional circumstances and Dean approval.' },
+  { id:'s008', category:'Programme Changes', question:'How long does a programme change take to process?', answer:'Programme change requests take up to 15 working days to process after submission.' },
+  { id:'s009', category:'Programme Changes', question:'Will my completed credits transfer if I change programmes?', answer:'Credits may be recognised by the receiving department at their discretion. A credit recognition assessment is conducted as part of the programme change review process.' },
+  { id:'s010', category:'Programme Changes', question:'What documents do I need to change my programme?', answer:'You will need a formal motivation letter, approval from your current Faculty, and acceptance from the receiving Faculty. Submit everything to the Registry Services Office.' },
+  { id:'s011', category:'General', question:'How do I track the status of my request?', answer:'You can track your request under My Requests in the sidebar. Requests are listed under Pending, Approved, or Denied with full details and any admin notes.' },
+  { id:'s012', category:'General', question:'Who do I contact if my request is denied?', answer:'If your request is denied, you have the right to appeal within 5 working days. Contact the Faculty Dean Office with additional supporting documentation and a written motivation.' },
+  { id:'s013', category:'General', question:'What are Registry Services office hours?', answer:'Registry Services contact details are to be updated. Please check the Help Desk portal or contact your faculty for the latest information.' },
+  { id:'s014', category:'General', question:'How long does it take to process a request?', answer:'Add or drop requests: 3 to 5 working days. Extra credit load: 5 to 7 working days. Programme change: up to 15 working days.' }
+];
+
+// ── TF-IDF retrieval ─────────────────────────────────────
+function tokenise(text) { return text.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(Boolean); }
+function buildTfidf(docs) {
+  var N=docs.length, df={};
+  docs.forEach(function(t){var s={};t.forEach(function(w){if(!s[w]){df[w]=(df[w]||0)+1;s[w]=1;}});});
+  return docs.map(function(tokens){
+    var tf={},vec={};
+    tokens.forEach(function(w){tf[w]=(tf[w]||0)+1;});
+    Object.keys(tf).forEach(function(w){vec[w]=(tf[w]/tokens.length)*Math.log((N+1)/((df[w]||0)+1));});
+    return vec;
+  });
+}
+function cosine(a,b){var dot=0,na=0,nb=0;Object.keys(a).forEach(function(t){dot+=(a[t]||0)*(b[t]||0);na+=a[t]*a[t];});Object.keys(b).forEach(function(t){nb+=b[t]*b[t];});return(na&&nb)?dot/(Math.sqrt(na)*Math.sqrt(nb)):0;}
+
+var DOC_TOKENS=FAQ_KB.map(function(f){return tokenise(f.question+' '+f.answer);});
+var DOC_VECS=buildTfidf(DOC_TOKENS);
+
+function retrieve(query,topK){
+  topK=topK||3;
+  var N=FAQ_KB.length,df={};
+  DOC_TOKENS.forEach(function(t){var s={};t.forEach(function(w){if(!s[w]){df[w]=(df[w]||0)+1;s[w]=1;}});});
+  var qt=tokenise(query),qtf={},qv={};
+  qt.forEach(function(w){qtf[w]=(qtf[w]||0)+1;});
+  Object.keys(qtf).forEach(function(w){qv[w]=(qtf[w]/qt.length)*Math.log((N+1)/((df[w]||0)+1));});
+  var scored=FAQ_KB.map(function(f,i){return{faq:f,score:cosine(qv,DOC_VECS[i])};});
+  scored.sort(function(a,b){return b.score-a.score;});
+  return scored.slice(0,topK).filter(function(s){return s.score>0;});
+}
+
+// ── Submitted questions (stored in sessionStorage) ────────
+function getSubmitted() { try{return JSON.parse(sessionStorage.getItem('ub_submitted_faqs')||'[]');}catch(e){return[];} }
+function saveSubmitted(arr) { sessionStorage.setItem('ub_submitted_faqs', JSON.stringify(arr)); }
+
+// ── State ─────────────────────────────────────────────────
+var API_KEY = '';
+var lastQuery = '';
+
+function saveKey(){
+  var v=document.getElementById('apiKeyInput').value.trim();
+  if(!v.startsWith('sk-ant-')){showError('Please enter a valid Anthropic API key (starts with sk-ant-).'); return;}
+  API_KEY=v;
+  document.getElementById('keySaved').classList.add('visible');
+  document.getElementById('apiKeyInput').value='';
+}
+
+function askRag(){
+  var query=document.getElementById('ragInput').value.trim();
+  if(!query||query.length<3){showError('Please enter a question (at least 3 characters).'); return;}
+  if(!API_KEY){showError('Please enter and save your Anthropic API key first.'); return;}
+  lastQuery=query;
+
+  var hits=retrieve(query,3);
+  if(!hits.length){showError('No relevant FAQs found. Try rephrasing or browse the FAQs below.'); return;}
+
+  var context=hits.map(function(h,i){return 'FAQ '+(i+1)+':\nQ: '+h.faq.question+'\nA: '+h.faq.answer;}).join('\n\n');
+  var system='You are a helpful assistant for the University of Botswana Student Affairs Help Desk. Answer student questions clearly and concisely using only the FAQ information provided. If the FAQs do not fully answer the question, say so honestly and direct the student to contact Registry Services directly through the Help Desk portal. Never invent information not in the FAQs.';
+  var msg='Using the FAQ information below, answer this student question.\n\n--- FAQ CONTEXT ---\n'+context+'\n--- END ---\n\nStudent question: '+query;
+
+  setLoading(true); clearError();
+  document.getElementById('ragResult').classList.remove('on');
+  document.getElementById('submitRow').classList.remove('visible');
+  document.getElementById('submitOk').classList.remove('visible');
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:512,system:system,messages:[{role:'user',content:msg}]})
+  })
+  .then(function(res){if(!res.ok)return res.json().then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'API error '+res.status);});return res.json();})
+  .then(function(data){
+    var answer=data.content&&data.content[0]?data.content[0].text:'No answer returned.';
+    document.getElementById('ragAnswer').textContent=answer;
+
+    var chips=document.getElementById('ragChips');
+    chips.innerHTML='';
+    hits.forEach(function(h){
+      var chip=document.createElement('span');
+      chip.className='rag-chip';
+      var q=h.faq.question.length>50?h.faq.question.substring(0,50)+'...':h.faq.question;
+      chip.innerHTML=h.faq.category+' \u2014 '+q+'<span class="chip-score">'+Math.round(h.score*100)+'%</span>';
+      chips.appendChild(chip);
+    });
+
+    document.getElementById('ragResult').classList.add('on');
+
+    // Show "Submit to Admin" if top score is low (answer may be incomplete)
+    if(hits[0].score < 0.25) {
+      document.getElementById('submitRow').classList.add('visible');
+    }
+  })
+  .catch(function(err){showError('Error: '+(err.message||'Check your API key and try again.'));})
+  .finally(function(){setLoading(false);});
+}
+
+function submitToAdmin(){
+  if(!lastQuery) return;
+  var submitted=getSubmitted();
+  // Avoid duplicate submissions
+  var alreadyExists=submitted.some(function(q){return q.question.toLowerCase()===lastQuery.toLowerCase();});
+  if(alreadyExists){
+    document.getElementById('submitOk').textContent='This question has already been submitted.';
+    document.getElementById('submitOk').classList.add('visible');
+    document.getElementById('submitBtn').disabled=true;
+    return;
+  }
+  submitted.push({
+    id: 'SQ' + Date.now(),
+    question: lastQuery,
+    submittedBy: u ? u.name : 'Student',
+    studentId:   u ? u.id   : '',
+    date: new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
+    status: 'pending'
+  });
+  saveSubmitted(submitted);
+  document.getElementById('submitOk').classList.add('visible');
+  document.getElementById('submitBtn').disabled=true;
+  document.getElementById('submitRow').classList.remove('visible');
+}
+
+function setLoading(on){
+  document.getElementById('ragLoading').classList.toggle('on',on);
+  doc

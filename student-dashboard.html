@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UB Help Desk - Student Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
+  <span class="topbar-user" id="topbar-name"></span>
+  <a href="index.html" class="topbar-logout">Log out</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Overview</div>
+      <a href="student-dashboard.html" class="sb-link active">Dashboard</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Submit Request</div>
+      <a href="student-credits.html" class="sb-link">Extra Credits</a>
+      <a href="student-addcourse.html" class="sb-link">Add a Course</a>
+      <a href="student-dropcourse.html" class="sb-link">Drop a Course</a>
+      <a href="student-program.html" class="sb-link">Change Program</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">My Requests</div>
+      <a href="student-pending.html" class="sb-link">Pending</a>
+      <a href="student-approved.html" class="sb-link">Approved</a>
+      <a href="student-denied.html" class="sb-link">Denied</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Help</div>
+      <a href="student-faq.html" class="sb-link">FAQs</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="ph">
+      <h2 id="greeting">Good day</h2>
+      <p>University of Botswana &mdash; Student Affairs Help Desk Portal</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val">18</div>
+        <div class="stat-lbl">Current Credits</div>
+        <div class="stat-sub" style="color:var(--g400)">Standard allocation: 18</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">Pending Requests</div>
+        <div class="stat-sub" style="color:var(--amber)">Awaiting review</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">Approved</div>
+        <div class="stat-sub" style="color:var(--green)">67% approval rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">1</div>
+        <div class="stat-lbl">Denied</div>
+        <div class="stat-sub" style="color:var(--g400)">5 total submitted</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="card">
+          <div class="card-title">Available Services</div>
+          <div class="service-grid" style="grid-template-columns:1fr 1fr;">
+            <a href="student-credits.html" class="service-tile blue">
+              <div class="st-title">Extra Credits</div>
+              <div class="st-desc">Request to carry more than 18 credits this semester.</div>
+              <span class="st-tag tag-blue">Academic</span>
+            </a>
+            <a href="student-addcourse.html" class="service-tile green">
+              <div class="st-title">Add a Course</div>
+              <div class="st-desc">Register for an additional course outside your enrolment.</div>
+              <span class="st-tag tag-green">Registration</span>
+            </a>
+            <a href="student-dropcourse.html" class="service-tile red">
+              <div class="st-title">Drop a Course</div>
+              <div class="st-desc">Request to remove a course from your registration.</div>
+              <span class="st-tag tag-red">Registration</span>
+            </a>
+            <a href="student-program.html" class="service-tile amber">
+              <div class="st-title">Change Program</div>
+              <div class="st-desc">Submit a formal request to transfer to a different programme.</div>
+              <span class="st-tag tag-amber">Programme</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title">Frequently Asked Questions</div>
+          <div class="faq-item" id="fd1">
+            <div class="faq-q" onclick="toggleFaq('fd1')"><span>How do I add a course to my registration?</span><span class="faq-chevron">v</span></div>
+            <div class="faq-a">Navigate to "Add a Course" from the sidebar. Review the requirements and visit the Registry Services Office with your request. Additions are only permitted within the first two weeks of semester.</div>
+          </div>
+          <div class="faq-item" id="fd2">
+            <div class="faq-q" onclick="toggleFaq('fd2')"><span>What is the standard credit allocation?</span><span class="faq-chevron">v</span></div>
+            <div class="faq-a">The standard allocation is 18 credits per semester. Taking more than 18 requires a formal extra credits request, subject to a minimum CGPA of 3.0 and Registry approval.</div>
+          </div>
+          <div class="faq-item" id="fd3">
+            <div class="faq-q" onclick="toggleFaq('fd3')"><span>How do I track the status of my request?</span><span class="faq-chevron">v</span></div>
+            <div class="faq-a">Track your request under "My Requests" in the sidebar. Requests are listed under Pending, Approved, or Denied with full details and any admin notes.</div>
+          </div>
+          <div style="margin-top:12px;text-align:right;">
+            <a href="student-faq.html" style="font-size:13px;color:var(--blue);font-weight:bold;text-decoration:none;">View all FAQs &gt;</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Important Notices</div>
+          <div class="ibox info"></div>
+          <div class="ibox warn"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  var u = requireStudent();
+  if (u) {
+    document.getElementById('topbar-name').textContent = u.name;
+    document.getElementById('greeting').textContent = 'Good day, ' + u.name.split(' ')[0];
+  }
+</script>
+</body>
+</html>
