@@ -405,7 +405,13 @@ app.get('/api/admin/reports/faq', requireAdmin, async (req, res) => {
 
 // ── Health check ──────────────────────────────────────────
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
-
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'running', 
+    message: 'UB Help Desk API is live',
+    version: '1.0.0'
+  });
+});
 // ── Start ─────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\nUB Help Desk API running on port ${PORT}`);
