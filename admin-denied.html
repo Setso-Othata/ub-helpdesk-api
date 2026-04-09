@@ -5,67 +5,95 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UB Help Desk - Denied Requests</title>
 <link rel="stylesheet" href="style.css">
+<script src="shared.js"></script>
+<style>
+.empty-state{text-align:center;padding:60px 20px;color:var(--g400);}
+.empty-state .es-icon{font-size:48px;margin-bottom:16px;}
+.empty-state p{font-size:15px;font-weight:bold;color:var(--navy);margin-bottom:6px;}
+.empty-state span{font-size:13px;}
+.loading-state{text-align:center;padding:60px 20px;color:var(--g400);font-size:14px;}
+</style>
 </head>
 <body>
-
 <div class="topbar">
   <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
   <span class="topbar-user" id="topbar-name"></span>
-  <div class="bell-wrap">
-    <a href="admin-pending.html" class="bell-btn">Alerts</a>
-    <span class="bell-count">2</span>
-  </div>
-  <a href="index.html" class="topbar-logout">Log out</a>
+  <div class="bell-wrap"><a href="admin-pending.html" class="bell-btn">Alerts</a><span class="bell-count" id="pendingCount">…</span></div>
+  <a href="index.html" class="topbar-logout" onclick="doLogout();return false;">Log out</a>
 </div>
-
 <div class="layout">
   <div class="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">Overview</div>
-      <a href="admin-dashboard.html" class="sb-link">Dashboard</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Requests</div>
+    <div class="sb-section"><div class="sb-label">Overview</div><a href="admin-dashboard.html" class="sb-link">Dashboard</a></div>
+    <div class="sb-section"><div class="sb-label">Requests</div>
       <a href="admin-pending.html" class="sb-link">Pending</a>
       <a href="admin-approved.html" class="sb-link">Approved</a>
       <a href="admin-denied.html" class="sb-link active">Denied</a>
     </div>
-    <div class="sb-section">
-      <div class="sb-label">Analytics</div>
-      <a href="admin-report.html" class="sb-link">Reports</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Help</div>
-      <a href="admin-faq.html" class="sb-link">FAQs</a>
-    </div>
+    <div class="sb-section"><div class="sb-label">Analytics</div><a href="admin-report.html" class="sb-link">Reports</a></div>
+    <div class="sb-section"><div class="sb-label">Help</div><a href="admin-faq.html" class="sb-link">FAQs</a></div>
   </div>
-
   <div class="main">
-    <div class="ph">
-      <h2>Denied Requests</h2>
-      <p>1 request denied</p>
-    </div>
-
-    <div class="rcard denied">
-      <div class="r-body">
-        <div class="r-title">Drop Course &mdash; MATH202 Linear Algebra</div>
-        <div class="r-meta"><strong>Tebogo Kgosi</strong> &nbsp;&middot;&nbsp; UB23050002 &nbsp;&middot;&nbsp; 20 Dec 2025 &nbsp;&middot;&nbsp; REQ0003</div>
-        <div class="r-reason">Unavoidable timetable clash with mandatory CS302 lab. I plan to register for MATH202 again in Semester 1 next year.</div>
-        <div class="r-note err">Decision note: MATH202 is a core requirement. A timetable exemption must first be obtained from your Faculty.</div>
-      </div>
-      <div class="r-right">
-        <span class="tbadge tbd">Drop a Course</span>
-        <span class="sp sp-denied">Denied</span>
-        <div class="by-note">By Dr. Ruth Sebele<br>21 Dec 2025</div>
-      </div>
-    </div>
+    <div class="ph"><h2>Denied Requests</h2><p id="subtitle">Loading…</p></div>
+    <div id="requestsList"><div class="loading-state">Loading requests…</div></div>
   </div>
 </div>
-
-<script src="shared.js"></script>
 <script>
-  var u = requireAdmin();
-  if (u) document.getElementById('topbar-name').textContent = u.name;
+var u = requireAdmin();
+if (u) document.getElementById('topbar-name').textContent = u.name;
+
+var TYPE_LABELS = {
+  extra_credits:    {label:'Extra Credit Load',cls:'tbc'},
+  add_course:       {label:'Add a Course',     cls:'tba'},
+  drop_course:      {label:'Drop a Course',    cls:'tbd'},
+  change_programme: {label:'Change Programme', cls:'tbc'}
+};
+
+function fmt(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+
+async function loadRequests() {
+  try {
+    var [resD, resP] = await Promise.all([
+      apiFetch('/api/admin/requests?status=denied'),
+      apiFetch('/api/admin/requests?status=pending')
+    ]);
+    var dataD = await resD.json();
+    var dataP = await resP.json();
+    if (!resD.ok) throw new Error(dataD.error || 'Failed');
+    document.getElementById('pendingCount').textContent = (dataP.requests||[]).length;
+    var reqs = dataD.requests || [];
+    document.getElementById('subtitle').textContent =
+      reqs.length === 0 ? 'No denied requests' :
+      reqs.length + ' request' + (reqs.length===1?'':'s') + ' denied';
+    var list = document.getElementById('requestsList');
+    if (!reqs.length) {
+      list.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><p>No denied requests</p><span>Denied requests will appear here.</span></div>';
+      return;
+    }
+    list.innerHTML = reqs.map(function(r) {
+      var t = TYPE_LABELS[r.request_type]||{label:r.request_type,cls:'tbc'};
+      var sName = r.student?r.student.full_name:'—';
+      var sId   = r.student?r.student.student_id:'—';
+      var byName = r.admin?r.admin.full_name:'Registry';
+      return '<div class="rcard denied">'+
+        '<div class="r-body">'+
+          '<div class="r-title">'+r.subject+'</div>'+
+          '<div class="r-meta"><strong>'+sName+'</strong> &nbsp;&middot;&nbsp; '+sId+' &nbsp;&middot;&nbsp; '+fmt(r.submitted_at)+' &nbsp;&middot;&nbsp; '+r.ref_number+'</div>'+
+          '<div class="r-reason">'+r.reason+'</div>'+
+          (r.admin_note?'<div class="r-note err">Decision note: '+r.admin_note+'</div>':'')+
+        '</div>'+
+        '<div class="r-right">'+
+          '<span class="tbadge '+t.cls+'">'+t.label+'</span>'+
+          '<span class="sp sp-denied">Denied</span>'+
+          '<div class="by-note">By '+byName+'<br>'+fmt(r.actioned_at)+'</div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  } catch(err) {
+    document.getElementById('requestsList').innerHTML =
+      '<div class="empty-state"><div class="es-icon">⚠️</div><p>Could not load requests</p><span>'+err.message+'</span></div>';
+  }
+}
+loadRequests();
 </script>
 </body>
 </html>

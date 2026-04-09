@@ -1,5 +1,5 @@
 // Shared utilities for UB Help Desk
-
+const API_BASE = 'https://ub-helpdesk-api.onrender.com';
 function getUser() {
   try { return JSON.parse(sessionStorage.getItem('ub_user')); } catch(e) { return null; }
 }

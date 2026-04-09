@@ -5,85 +5,221 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UB Help Desk - Pending Requests</title>
 <link rel="stylesheet" href="style.css">
+<script src="shared.js"></script>
+<style>
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:12px;padding:32px 36px;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,.18);}
+.modal-title{font-size:17px;font-weight:bold;color:var(--navy);margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--g600);margin-bottom:20px;}
+.modal-box textarea{width:100%;border:1.5px solid var(--g300);border-radius:8px;padding:10px 12px;font-size:13.5px;font-family:Arial,sans-serif;color:var(--navy);resize:vertical;min-height:90px;outline:none;box-sizing:border-box;}
+.modal-box textarea:focus{border-color:var(--gold);}
+.modal-actions{display:flex;gap:12px;margin-top:18px;justify-content:flex-end;}
+.modal-cancel{padding:9px 20px;border:1.5px solid var(--g300);border-radius:7px;background:#fff;font-size:13.5px;font-weight:bold;color:var(--g600);cursor:pointer;}
+.modal-cancel:hover{background:var(--g100);}
+.modal-confirm{padding:9px 20px;border:none;border-radius:7px;font-size:13.5px;font-weight:bold;cursor:pointer;}
+.modal-confirm.approve{background:#1a7a4a;color:#fff;}
+.modal-confirm.deny{background:#c0392b;color:#fff;}
+.modal-confirm:hover{opacity:.88;}
+.modal-confirm:disabled{opacity:.5;cursor:not-allowed;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--g400);}
+.empty-state .es-icon{font-size:48px;margin-bottom:16px;}
+.empty-state p{font-size:15px;font-weight:bold;color:var(--navy);margin-bottom:6px;}
+.empty-state span{font-size:13px;}
+.loading-state{text-align:center;padding:60px 20px;color:var(--g400);font-size:14px;}
+</style>
 </head>
 <body>
+
+<!-- Approve modal -->
+<div class="modal-overlay" id="approveModal">
+  <div class="modal-box">
+    <div class="modal-title">Approve Request</div>
+    <div class="modal-sub" id="approveModalSub"></div>
+    <textarea id="approveNote" placeholder="Optional note for the student…"></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm approve" id="approveConfirmBtn" onclick="confirmApprove()">Confirm Approval</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deny modal -->
+<div class="modal-overlay" id="denyModal">
+  <div class="modal-box">
+    <div class="modal-title">Deny Request</div>
+    <div class="modal-sub" id="denyModalSub"></div>
+    <textarea id="denyReason" placeholder="Reason for denial (required)…"></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm deny" id="denyConfirmBtn" onclick="confirmDeny()">Confirm Denial</button>
+    </div>
+  </div>
+</div>
 
 <div class="topbar">
   <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
   <span class="topbar-user" id="topbar-name"></span>
   <div class="bell-wrap">
     <a href="admin-pending.html" class="bell-btn">Alerts</a>
-    <span class="bell-count">2</span>
+    <span class="bell-count" id="pendingCount">…</span>
   </div>
-  <a href="index.html" class="topbar-logout">Log out</a>
+  <a href="index.html" class="topbar-logout" onclick="doLogout();return false;">Log out</a>
 </div>
 
 <div class="layout">
   <div class="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">Overview</div>
-      <a href="admin-dashboard.html" class="sb-link">Dashboard</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Requests</div>
+    <div class="sb-section"><div class="sb-label">Overview</div><a href="admin-dashboard.html" class="sb-link">Dashboard</a></div>
+    <div class="sb-section"><div class="sb-label">Requests</div>
       <a href="admin-pending.html" class="sb-link active">Pending</a>
       <a href="admin-approved.html" class="sb-link">Approved</a>
       <a href="admin-denied.html" class="sb-link">Denied</a>
     </div>
-    <div class="sb-section">
-      <div class="sb-label">Analytics</div>
-      <a href="admin-report.html" class="sb-link">Reports</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Help</div>
-      <a href="admin-faq.html" class="sb-link">FAQs</a>
-    </div>
+    <div class="sb-section"><div class="sb-label">Analytics</div><a href="admin-report.html" class="sb-link">Reports</a></div>
+    <div class="sb-section"><div class="sb-label">Help</div><a href="admin-faq.html" class="sb-link">FAQs</a></div>
   </div>
-
   <div class="main">
     <div class="ph">
       <h2>Pending Requests</h2>
-      <p>2 requests awaiting your review</p>
+      <p id="pendingSubtitle">Loading…</p>
     </div>
-
-    <div class="rcard pending">
-      <div class="r-body">
-        <div class="r-title">Extra Credits &mdash; Requesting 21 credits total</div>
-        <div class="r-meta"><strong>Kefilwe Moeti</strong> &nbsp;&middot;&nbsp; UB23050001 &nbsp;&middot;&nbsp; 12 Jan 2026 &nbsp;&middot;&nbsp; REQ0001</div>
-        <div class="r-reason">I am in my final semester and need 3 extra courses to graduate on time. My CGPA is 3.6 and I have no outstanding academic issues.</div>
-      </div>
-      <div class="r-right">
-        <span class="tbadge tbc">Extra Credit Load</span>
-        <span class="sp sp-pending">Pending</span>
-        <div class="admin-acts">
-          <button class="btn-ok">Approve</button>
-          <button class="btn-no">Deny</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="rcard pending">
-      <div class="r-body">
-        <div class="r-title">Add Course &mdash; STAT201 Statistics I</div>
-        <div class="r-meta"><strong>Tebogo Kgosi</strong> &nbsp;&middot;&nbsp; UB23050002 &nbsp;&middot;&nbsp; 03 Jan 2026 &nbsp;&middot;&nbsp; REQ0004</div>
-        <div class="r-reason">STAT201 is a required elective for my BBA concentration. My advisor recommended I take it in Semester 2 to complete the analytics track on time.</div>
-      </div>
-      <div class="r-right">
-        <span class="tbadge tba">Add a Course</span>
-        <span class="sp sp-pending">Pending</span>
-        <div class="admin-acts">
-          <button class="btn-ok">Approve</button>
-          <button class="btn-no">Deny</button>
-        </div>
-      </div>
-    </div>
+    <div id="requestsList"><div class="loading-state">Loading requests…</div></div>
   </div>
 </div>
 
-<script src="shared.js"></script>
 <script>
-  var u = requireAdmin();
-  if (u) document.getElementById('topbar-name').textContent = u.name;
+var u = requireAdmin();
+if (u) document.getElementById('topbar-name').textContent = u.name;
+
+var activeRequestId = null;
+var activeRequestRef = null;
+
+var TYPE_LABELS = {
+  extra_credits:    { label:'Extra Credit Load', cls:'tbc' },
+  add_course:       { label:'Add a Course',      cls:'tba' },
+  drop_course:      { label:'Drop a Course',     cls:'tbd' },
+  change_programme: { label:'Change Programme',  cls:'tbc' }
+};
+
+function fmt(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+async function loadRequests() {
+  try {
+    var res  = await apiFetch('/api/admin/requests?status=pending');
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to load');
+    var reqs = data.requests || [];
+    document.getElementById('pendingCount').textContent = reqs.length;
+    document.getElementById('pendingSubtitle').textContent =
+      reqs.length === 0 ? 'No pending requests' :
+      reqs.length === 1 ? '1 request awaiting your review' :
+      reqs.length + ' requests awaiting your review';
+    var list = document.getElementById('requestsList');
+    if (!reqs.length) {
+      list.innerHTML = '<div class="empty-state"><div class="es-icon">✅</div><p>All caught up!</p><span>No pending requests at this time.</span></div>';
+      return;
+    }
+    list.innerHTML = reqs.map(function(r) {
+      var t = TYPE_LABELS[r.request_type] || {label:r.request_type,cls:'tbc'};
+      var sName = r.student ? r.student.full_name : '—';
+      var sId   = r.student ? r.student.student_id : '—';
+      return '<div class="rcard pending" id="req-'+r.request_id+'">' +
+        '<div class="r-body">' +
+          '<div class="r-title">'+r.subject+'</div>' +
+          '<div class="r-meta"><strong>'+sName+'</strong> &nbsp;&middot;&nbsp; '+sId+' &nbsp;&middot;&nbsp; '+fmt(r.submitted_at)+' &nbsp;&middot;&nbsp; '+r.ref_number+'</div>' +
+          '<div class="r-reason">'+r.reason+'</div>' +
+        '</div>' +
+        '<div class="r-right">' +
+          '<span class="tbadge '+t.cls+'">'+t.label+'</span>' +
+          '<span class="sp sp-pending">Pending</span>' +
+          '<div class="admin-acts">' +
+            '<button class="btn-ok" onclick="openApprove('+r.request_id+',\''+r.ref_number+'\')">Approve</button>' +
+            '<button class="btn-no" onclick="openDeny('+r.request_id+',\''+r.ref_number+'\')">Deny</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(err) {
+    document.getElementById('requestsList').innerHTML =
+      '<div class="empty-state"><div class="es-icon">⚠️</div><p>Could not load requests</p><span>'+err.message+'</span></div>';
+  }
+}
+
+function openApprove(id, ref) {
+  activeRequestId = id; activeRequestRef = ref;
+  document.getElementById('approveModalSub').textContent = 'Approving '+ref+'. Add an optional note for the student.';
+  document.getElementById('approveNote').value = '';
+  document.getElementById('approveConfirmBtn').disabled = false;
+  document.getElementById('approveConfirmBtn').textContent = 'Confirm Approval';
+  document.getElementById('approveModal').classList.add('open');
+}
+
+function openDeny(id, ref) {
+  activeRequestId = id; activeRequestRef = ref;
+  document.getElementById('denyModalSub').textContent = 'Denying '+ref+'. The student will see this reason.';
+  document.getElementById('denyReason').value = '';
+  document.getElementById('denyReason').style.borderColor = '';
+  document.getElementById('denyConfirmBtn').disabled = false;
+  document.getElementById('denyConfirmBtn').textContent = 'Confirm Denial';
+  document.getElementById('denyModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('approveModal').classList.remove('open');
+  document.getElementById('denyModal').classList.remove('open');
+  activeRequestId = null; activeRequestRef = null;
+}
+
+async function confirmApprove() {
+  if (!activeRequestId) return;
+  var note = document.getElementById('approveNote').value.trim();
+  var btn  = document.getElementById('approveConfirmBtn');
+  btn.disabled = true; btn.textContent = 'Approving…';
+  try {
+    var res  = await apiFetch('/api/admin/requests/'+activeRequestId, {
+      method:'PUT', body:JSON.stringify({status:'approved', admin_note: note || 'Approved.'})
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    closeModal();
+    var card = document.getElementById('req-'+activeRequestId);
+    if (card) { card.style.opacity='0'; card.style.transition='opacity .3s'; }
+    setTimeout(loadRequests, 350);
+  } catch(err) {
+    alert('Error: '+err.message);
+    btn.disabled = false; btn.textContent = 'Confirm Approval';
+  }
+}
+
+async function confirmDeny() {
+  if (!activeRequestId) return;
+  var reason = document.getElementById('denyReason').value.trim();
+  if (!reason) { document.getElementById('denyReason').style.borderColor='#c0392b'; return; }
+  var btn = document.getElementById('denyConfirmBtn');
+  btn.disabled = true; btn.textContent = 'Denying…';
+  try {
+    var res  = await apiFetch('/api/admin/requests/'+activeRequestId, {
+      method:'PUT', body:JSON.stringify({status:'denied', admin_note: reason})
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    closeModal();
+    var card = document.getElementById('req-'+activeRequestId);
+    if (card) { card.style.opacity='0'; card.style.transition='opacity .3s'; }
+    setTimeout(loadRequests, 350);
+  } catch(err) {
+    alert('Error: '+err.message);
+    btn.disabled = false; btn.textContent = 'Confirm Denial';
+  }
+}
+
+document.getElementById('approveModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('denyModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+loadRequests();
 </script>
 </body>
 </html>

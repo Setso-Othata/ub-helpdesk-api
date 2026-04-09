@@ -5,67 +5,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UB Help Desk - Denied Requests</title>
 <link rel="stylesheet" href="style.css">
+<script src="shared.js"></script>
+<style>
+.empty-state{text-align:center;padding:60px 20px;color:var(--g400);}
+.empty-state .es-icon{font-size:48px;margin-bottom:16px;}
+.empty-state p{font-size:15px;font-weight:bold;color:var(--navy);margin-bottom:6px;}
+.empty-state span{font-size:13px;}
+.loading-state{text-align:center;padding:60px 20px;color:var(--g400);font-size:14px;}
+</style>
 </head>
 <body>
-
 <div class="topbar">
   <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
   <span class="topbar-user" id="topbar-name"></span>
-  <a href="index.html" class="topbar-logout">Log out</a>
+  <a href="index.html" class="topbar-logout" onclick="doLogout();return false;">Log out</a>
 </div>
-
 <div class="layout">
   <div class="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">Overview</div>
-      <a href="student-dashboard.html" class="sb-link">Dashboard</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Submit Request</div>
+    <div class="sb-section"><div class="sb-label">Overview</div><a href="student-dashboard.html" class="sb-link">Dashboard</a></div>
+    <div class="sb-section"><div class="sb-label">Submit Request</div>
       <a href="student-credits.html" class="sb-link">Extra Credits</a>
       <a href="student-addcourse.html" class="sb-link">Add a Course</a>
       <a href="student-dropcourse.html" class="sb-link">Drop a Course</a>
       <a href="student-program.html" class="sb-link">Change Program</a>
     </div>
-    <div class="sb-section">
-      <div class="sb-label">My Requests</div>
+    <div class="sb-section"><div class="sb-label">My Requests</div>
       <a href="student-pending.html" class="sb-link">Pending</a>
       <a href="student-approved.html" class="sb-link">Approved</a>
       <a href="student-denied.html" class="sb-link active">Denied</a>
     </div>
-    <div class="sb-section">
-      <div class="sb-label">Help</div>
-      <a href="student-faq.html" class="sb-link">FAQs</a>
-    </div>
+    <div class="sb-section"><div class="sb-label">Help</div><a href="student-faq.html" class="sb-link">FAQs</a></div>
   </div>
-
   <div class="main">
-    <div class="ph">
-      <h2>Denied Requests</h2>
-      <p>1 request denied</p>
-    </div>
-
-    <div class="ibox err" style="margin-bottom:16px;">These requests were not approved. Review the admin note and consider resubmitting with additional documentation.</div>
-
-    <div class="rcard denied">
-      <div class="r-body">
-        <div class="r-title">Drop Course &mdash; MATH202 Linear Algebra</div>
-        <div class="r-meta">20 Dec 2025 &nbsp;&middot;&nbsp; REQ0003</div>
-        <div class="r-reason">Unavoidable timetable clash with mandatory CS302 lab. I plan to register for MATH202 again in Semester 1 next year.</div>
-        <div class="r-note err">Admin: MATH202 is a core requirement. A timetable exemption must first be obtained from your Faculty.</div>
-      </div>
-      <div class="r-right">
-        <span class="tbadge tbd">Drop a Course</span>
-        <span class="sp sp-denied">Denied</span>
-      </div>
-    </div>
+    <div class="ph"><h2>Denied Requests</h2><p id="subtitle">Loading…</p></div>
+    <div id="requestsList"><div class="loading-state">Loading your requests…</div></div>
   </div>
 </div>
-
-<script src="shared.js"></script>
 <script>
-  var u = requireStudent();
-  if (u) document.getElementById('topbar-name').textContent = u.name;
+var u = requireStudent();
+if (u) document.getElementById('topbar-name').textContent = u.name;
+
+var TYPE_LABELS = {
+  extra_credits:    {label:'Extra Credit Load',cls:'tbc'},
+  add_course:       {label:'Add a Course',     cls:'tba'},
+  drop_course:      {label:'Drop a Course',    cls:'tbd'},
+  change_programme: {label:'Change Programme', cls:'tbc'}
+};
+
+function fmt(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+
+async function loadRequests(){
+  try{
+    var res  = await apiFetch('/api/requests?status=denied');
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error||'Failed to load');
+    var reqs = data.requests||[];
+    document.getElementById('subtitle').textContent =
+      reqs.length===0?'No denied requests':
+      reqs.length===1?'1 request denied':
+      reqs.length+' requests denied';
+    var list = document.getElementById('requestsList');
+    if(!reqs.length){
+      list.innerHTML='<div class="empty-state"><div class="es-icon">📋</div><p>No denied requests</p><span>Denied requests will appear here.</span></div>';
+      return;
+    }
+    list.innerHTML = reqs.map(function(r){
+      var t=TYPE_LABELS[r.request_type]||{label:r.request_type,cls:'tbc'};
+      return '<div class="rcard denied">'+
+        '<div class="r-body">'+
+          '<div class="r-title">'+r.subject+'</div>'+
+          '<div class="r-meta">'+fmt(r.submitted_at)+' &nbsp;&middot;&nbsp; '+r.ref_number+'</div>'+
+          '<div class="r-reason">'+r.reason+'</div>'+
+          (r.admin_note?'<div class="r-note err">Admin note: '+r.admin_note+'</div>':'')+
+        '</div>'+
+        '<div class="r-right">'+
+          '<span class="tbadge '+t.cls+'">'+t.label+'</span>'+
+          '<span class="sp sp-denied">Denied</span>'+
+          (r.actioned_at?'<div class="by-note">Actioned '+fmt(r.actioned_at)+'</div>':'')+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }catch(err){
+    document.getElementById('requestsList').innerHTML=
+      '<div class="empty-state"><div class="es-icon">⚠️</div><p>Could not load requests</p><span>'+err.message+'</span></div>';
+  }
+}
+loadRequests();
 </script>
 </body>
 </html>

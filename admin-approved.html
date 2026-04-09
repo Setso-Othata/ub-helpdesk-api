@@ -5,81 +5,96 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UB Help Desk - Approved Requests</title>
 <link rel="stylesheet" href="style.css">
+<script src="shared.js"></script>
+<style>
+.empty-state{text-align:center;padding:60px 20px;color:var(--g400);}
+.empty-state .es-icon{font-size:48px;margin-bottom:16px;}
+.empty-state p{font-size:15px;font-weight:bold;color:var(--navy);margin-bottom:6px;}
+.empty-state span{font-size:13px;}
+.loading-state{text-align:center;padding:60px 20px;color:var(--g400);font-size:14px;}
+</style>
 </head>
 <body>
-
 <div class="topbar">
   <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
   <span class="topbar-user" id="topbar-name"></span>
-  <div class="bell-wrap">
-    <a href="admin-pending.html" class="bell-btn">Alerts</a>
-    <span class="bell-count">2</span>
-  </div>
-  <a href="index.html" class="topbar-logout">Log out</a>
+  <div class="bell-wrap"><a href="admin-pending.html" class="bell-btn">Alerts</a><span class="bell-count" id="pendingCount">…</span></div>
+  <a href="index.html" class="topbar-logout" onclick="doLogout();return false;">Log out</a>
 </div>
-
 <div class="layout">
   <div class="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">Overview</div>
-      <a href="admin-dashboard.html" class="sb-link">Dashboard</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Requests</div>
+    <div class="sb-section"><div class="sb-label">Overview</div><a href="admin-dashboard.html" class="sb-link">Dashboard</a></div>
+    <div class="sb-section"><div class="sb-label">Requests</div>
       <a href="admin-pending.html" class="sb-link">Pending</a>
       <a href="admin-approved.html" class="sb-link active">Approved</a>
       <a href="admin-denied.html" class="sb-link">Denied</a>
     </div>
-    <div class="sb-section">
-      <div class="sb-label">Analytics</div>
-      <a href="admin-report.html" class="sb-link">Reports</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Help</div>
-      <a href="admin-faq.html" class="sb-link">FAQs</a>
-    </div>
+    <div class="sb-section"><div class="sb-label">Analytics</div><a href="admin-report.html" class="sb-link">Reports</a></div>
+    <div class="sb-section"><div class="sb-label">Help</div><a href="admin-faq.html" class="sb-link">FAQs</a></div>
   </div>
-
   <div class="main">
-    <div class="ph">
-      <h2>Approved Requests</h2>
-      <p>2 requests approved</p>
-    </div>
-
-    <div class="rcard approved">
-      <div class="r-body">
-        <div class="r-title">Add Course &mdash; CS401 Artificial Intelligence</div>
-        <div class="r-meta"><strong>Kefilwe Moeti</strong> &nbsp;&middot;&nbsp; UB23050001 &nbsp;&middot;&nbsp; 08 Jan 2026 &nbsp;&middot;&nbsp; REQ0002</div>
-        <div class="r-reason">CS401 is a prerequisite for my Honours research thesis. I have completed CS201 and CS301 which are the listed prerequisites.</div>
-        <div class="r-note ok">Decision note: Approved. Prerequisites confirmed. Registered in Section B.</div>
-      </div>
-      <div class="r-right">
-        <span class="tbadge tba">Add a Course</span>
-        <span class="sp sp-approved">Approved</span>
-        <div class="by-note">By Dr. Ruth Sebele<br>09 Jan 2026</div>
-      </div>
-    </div>
-
-    <div class="rcard approved">
-      <div class="r-body">
-        <div class="r-title">Drop Course &mdash; ENG101 Technical Writing</div>
-        <div class="r-meta"><strong>Kefilwe Moeti</strong> &nbsp;&middot;&nbsp; UB23050001 &nbsp;&middot;&nbsp; 05 Jan 2026 &nbsp;&middot;&nbsp; REQ0005</div>
-        <div class="r-reason">ENG101 conflicts with a compulsory CS302 lab session. I will register for the evening section next semester.</div>
-        <div class="r-note ok">Decision note: Approved. Withdrawal recorded. No academic penalty &mdash; within Week 2 deadline.</div>
-      </div>
-      <div class="r-right">
-        <span class="tbadge tbd">Drop a Course</span>
-        <span class="sp sp-approved">Approved</span>
-        <div class="by-note">By Dr. Ruth Sebele<br>06 Jan 2026</div>
-      </div>
-    </div>
+    <div class="ph"><h2>Approved Requests</h2><p id="subtitle">Loading…</p></div>
+    <div id="requestsList"><div class="loading-state">Loading requests…</div></div>
   </div>
 </div>
-
-<script src="shared.js"></script>
 <script>
-  var u = requireAdmin();
-  if (u) document.getElementById('topbar-name').textContent = u.name;
+var u = requireAdmin();
+if (u) document.getElementById('topbar-name').textContent = u.name;
+
+var TYPE_LABELS = {
+  extra_credits:    {label:'Extra Credit Load',cls:'tbc'},
+  add_course:       {label:'Add a Course',     cls:'tba'},
+  drop_course:      {label:'Drop a Course',    cls:'tbd'},
+  change_programme: {label:'Change Programme', cls:'tbc'}
+};
+
+function fmt(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+
+async function loadRequests() {
+  try {
+    // load approved + pending count in parallel
+    var [resA, resP] = await Promise.all([
+      apiFetch('/api/admin/requests?status=approved'),
+      apiFetch('/api/admin/requests?status=pending')
+    ]);
+    var dataA = await resA.json();
+    var dataP = await resP.json();
+    if (!resA.ok) throw new Error(dataA.error || 'Failed');
+    document.getElementById('pendingCount').textContent = (dataP.requests||[]).length;
+    var reqs = dataA.requests || [];
+    document.getElementById('subtitle').textContent =
+      reqs.length === 0 ? 'No approved requests yet' :
+      reqs.length + ' request' + (reqs.length===1?'':'s') + ' approved';
+    var list = document.getElementById('requestsList');
+    if (!reqs.length) {
+      list.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><p>No approved requests yet</p><span>Approved requests will appear here.</span></div>';
+      return;
+    }
+    list.innerHTML = reqs.map(function(r) {
+      var t = TYPE_LABELS[r.request_type]||{label:r.request_type,cls:'tbc'};
+      var sName = r.student?r.student.full_name:'—';
+      var sId   = r.student?r.student.student_id:'—';
+      var byName = r.admin?r.admin.full_name:'Registry';
+      return '<div class="rcard approved">'+
+        '<div class="r-body">'+
+          '<div class="r-title">'+r.subject+'</div>'+
+          '<div class="r-meta"><strong>'+sName+'</strong> &nbsp;&middot;&nbsp; '+sId+' &nbsp;&middot;&nbsp; '+fmt(r.submitted_at)+' &nbsp;&middot;&nbsp; '+r.ref_number+'</div>'+
+          '<div class="r-reason">'+r.reason+'</div>'+
+          (r.admin_note?'<div class="r-note ok">Decision note: '+r.admin_note+'</div>':'')+
+        '</div>'+
+        '<div class="r-right">'+
+          '<span class="tbadge '+t.cls+'">'+t.label+'</span>'+
+          '<span class="sp sp-approved">Approved</span>'+
+          '<div class="by-note">By '+byName+'<br>'+fmt(r.actioned_at)+'</div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  } catch(err) {
+    document.getElementById('requestsList').innerHTML =
+      '<div class="empty-state"><div class="es-icon">⚠️</div><p>Could not load requests</p><span>'+err.message+'</span></div>';
+  }
+}
+loadRequests();
 </script>
 </body>
 </html>

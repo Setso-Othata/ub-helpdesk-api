@@ -4,9 +4,10 @@ const express    = require('express');
 const cors       = require('cors');
 const bcrypt     = require('bcryptjs');
 const jwt        = require('jsonwebtoken');
+const multer     = require('multer');
 const { createClient } = require('@supabase/supabase-js');
 
-// ── Supabase client (uses service key — server-side only) ─
+// ── Supabase client ───────────────────────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -19,28 +20,29 @@ const PORT = process.env.PORT || 3000;
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN || '*' }));
 app.use(express.json());
 
+// ── Multer — memory storage, 5 MB limit per file ──────────
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits:  { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ok = ['application/pdf','image/jpeg','image/jpg','image/png'];
+    ok.includes(file.mimetype) ? cb(null, true) : cb(new Error('Only PDF, JPG and PNG allowed'));
+  }
+});
+
 // ── JWT helpers ───────────────────────────────────────────
 const JWT_SECRET  = process.env.JWT_SECRET;
 const JWT_EXPIRES = '8h';
-
-function signToken(payload) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-}
-
-function verifyToken(token) {
-  try { return jwt.verify(token, JWT_SECRET); }
-  catch (e) { return null; }
-}
+const signToken   = p  => jwt.sign(p, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+const verifyToken = t  => { try { return jwt.verify(t, JWT_SECRET); } catch { return null; } };
 
 // ── Auth middleware ───────────────────────────────────────
 function requireAuth(req, res, next) {
   const header = req.headers['authorization'] || '';
   const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'No token provided' });
-
   const payload = verifyToken(token);
   if (!payload) return res.status(401).json({ error: 'Invalid or expired token' });
-
   req.user = payload;
   next();
 }
@@ -53,19 +55,15 @@ function requireAdmin(req, res, next) {
   });
 }
 
-// ═════════════════════════════════════════════════════════
-// AUTH ENDPOINTS
-// ═════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
 
-// POST /api/auth/login
-// Body: { identifier: "UB23050001" | "ADM001" | email, password: "..." }
 app.post('/api/auth/login', async (req, res) => {
   const { identifier, password } = req.body;
-
   if (!identifier || !password)
     return res.status(400).json({ error: 'Identifier and password are required' });
 
-  // Look up user by student_id, admin staff_id, or email
   const { data: users, error } = await supabase
     .from('users')
     .select('*')
@@ -73,19 +71,13 @@ app.post('/api/auth/login', async (req, res) => {
     .eq('is_active', true)
     .limit(1);
 
-  if (error) {
-    console.error('DB error:', error);
-    return res.status(500).json({ error: 'Database error' });
-  }
-
+  if (error) return res.status(500).json({ error: 'Database error' });
   const user = users?.[0];
   if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
-  // Verify password
   const valid = await bcrypt.compare(password, user.password_hash);
   if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
-  // Create session record
   const { data: session } = await supabase
     .from('sessions')
     .insert({
@@ -93,12 +85,11 @@ app.post('/api/auth/login', async (req, res) => {
       role:       user.role,
       ip_address: req.ip,
       user_agent: req.headers['user-agent'],
-      expires_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString()
+      expires_at: new Date(Date.now() + 8 * 3600 * 1000).toISOString()
     })
     .select('session_id')
     .single();
 
-  // Sign JWT
   const token = signToken({
     userId:    user.user_id,
     studentId: user.student_id,
@@ -109,311 +100,309 @@ app.post('/api/auth/login', async (req, res) => {
 
   res.json({
     token,
-    user: {
-      id:   user.student_id || String(user.user_id),
-      name: user.full_name,
-      role: user.role
-    }
+    user: { id: user.student_id || String(user.user_id), name: user.full_name, role: user.role }
   });
 });
 
-// POST /api/auth/logout
 app.post('/api/auth/logout', requireAuth, async (req, res) => {
   if (req.user.sessionId) {
-    await supabase
-      .from('sessions')
-      .update({ is_revoked: true })
-      .eq('session_id', req.user.sessionId);
+    await supabase.from('sessions').update({ is_revoked: true }).eq('session_id', req.user.sessionId);
   }
-  res.json({ message: 'Logged out successfully' });
+  res.json({ message: 'Logged out' });
 });
 
-// GET /api/auth/me
 app.get('/api/auth/me', requireAuth, async (req, res) => {
   const { data: user } = await supabase
-    .from('users')
-    .select('user_id, student_id, full_name, email, role, department')
-    .eq('user_id', req.user.userId)
-    .single();
-
+    .from('users').select('user_id,student_id,full_name,email,role,department')
+    .eq('user_id', req.user.userId).single();
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json({ user });
 });
 
-// ═════════════════════════════════════════════════════════
-// REQUESTS ENDPOINTS
-// ═════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// REQUESTS
+// ═══════════════════════════════════════════════════════════
 
-// GET /api/requests  (student — their own requests)
 app.get('/api/requests', requireAuth, async (req, res) => {
   const { status } = req.query;
-  let query = supabase
-    .from('requests')
-    .select('*')
+  let q = supabase.from('requests').select('*')
     .eq('student_id', req.user.userId)
     .order('submitted_at', { ascending: false });
-
-  if (status) query = query.eq('status', status);
-
-  const { data, error } = await query;
+  if (status) q = q.eq('status', status);
+  const { data, error } = await q;
   if (error) return res.status(500).json({ error: error.message });
   res.json({ requests: data });
 });
 
-// POST /api/requests  (student — submit new request)
 app.post('/api/requests', requireAuth, async (req, res) => {
   if (req.user.role !== 'student')
     return res.status(403).json({ error: 'Students only' });
 
-  const { request_type, subject, reason, course_code, course_name, credits_requested } = req.body;
-
-  // Generate ref number
+  const { request_type, subject, reason, course_code, course_name, credits_requested, form_data } = req.body;
   const { count } = await supabase.from('requests').select('*', { count: 'exact', head: true });
   const refNumber = 'REQ' + String((count || 0) + 1).padStart(4, '0');
 
-  const { data, error } = await supabase
-    .from('requests')
-    .insert({
-      ref_number: refNumber,
-      student_id: req.user.userId,
-      request_type, subject, reason,
-      course_code, course_name, credits_requested
-    })
-    .select()
-    .single();
+  const { data, error } = await supabase.from('requests')
+    .insert({ ref_number: refNumber, student_id: req.user.userId,
+              request_type, subject, reason, course_code, course_name, credits_requested, form_data })
+    .select().single();
 
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json({ request: data });
 });
 
-// GET /api/admin/requests  (admin — all requests)
 app.get('/api/admin/requests', requireAdmin, async (req, res) => {
   const { status, type } = req.query;
-  let query = supabase
-    .from('requests')
-    .select(`*, student:users!requests_student_id_fkey(full_name, student_id, email)`)
+  let q = supabase.from('requests')
+    .select('*, student:users!requests_student_id_fkey(full_name,student_id,email), admin:users!requests_admin_id_fkey(full_name)')
     .order('submitted_at', { ascending: false });
-
-  if (status) query = query.eq('status', status);
-  if (type)   query = query.eq('request_type', type);
-
-  const { data, error } = await query;
+  if (status) q = q.eq('status', status);
+  if (type)   q = q.eq('request_type', type);
+  const { data, error } = await q;
   if (error) return res.status(500).json({ error: error.message });
   res.json({ requests: data });
 });
 
-// PUT /api/admin/requests/:id  (admin — approve or deny)
 app.put('/api/admin/requests/:id', requireAdmin, async (req, res) => {
   const { status, admin_note } = req.body;
-  if (!['approved', 'denied'].includes(status))
+  if (!['approved','denied'].includes(status))
     return res.status(400).json({ error: 'Status must be approved or denied' });
-
-  const { data, error } = await supabase
-    .from('requests')
-    .update({
-      status,
-      admin_note,
-      admin_id:    req.user.userId,
-      actioned_at: new Date().toISOString(),
-      updated_at:  new Date().toISOString()
-    })
-    .eq('request_id', req.params.id)
-    .select()
-    .single();
-
+  const { data, error } = await supabase.from('requests')
+    .update({ status, admin_note, admin_id: req.user.userId,
+              actioned_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq('request_id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ request: data });
 });
 
-// ═════════════════════════════════════════════════════════
-// FAQ ENDPOINTS
-// ═════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// FILE UPLOADS
+// Storage bucket name: ub-helpdesk-docs  (public bucket)
+// Database table:      request_uploads
+// ═══════════════════════════════════════════════════════════
 
-// GET /api/faq  (public)
+const BUCKET = 'ub-helpdesk-docs';
+
+// POST /api/requests/:requestId/uploads
+// Multipart form-data — field name: "files" (multiple OK)
+// Optional body field: doc_type  (default: "supporting")
+app.post('/api/requests/:requestId/uploads', requireAuth, upload.array('files', 10), async (req, res) => {
+  const requestId = parseInt(req.params.requestId);
+
+  // Verify the request exists and belongs to this user (or admin)
+  const { data: request } = await supabase
+    .from('requests').select('request_id,student_id').eq('request_id', requestId).single();
+
+  if (!request)
+    return res.status(404).json({ error: 'Request not found' });
+  if (req.user.role !== 'admin' && request.student_id !== req.user.userId)
+    return res.status(403).json({ error: 'Not authorised to upload to this request' });
+  if (!req.files || req.files.length === 0)
+    return res.status(400).json({ error: 'No files received' });
+
+  const docType  = req.body.doc_type || 'supporting';
+  const uploaded = [];
+  const errors   = [];
+
+  for (const file of req.files) {
+    const safeName    = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const storagePath = `requests/${requestId}/${Date.now()}_${safeName}`;
+
+    // 1 — upload bytes to Supabase Storage
+    const { error: storageError } = await supabase.storage
+      .from(BUCKET)
+      .upload(storagePath, file.buffer, { contentType: file.mimetype, upsert: false });
+
+    if (storageError) {
+      errors.push({ file: file.originalname, error: storageError.message });
+      continue;
+    }
+
+    // 2 — get public URL (bucket must be public)
+    const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
+
+    // 3 — save record in request_uploads table
+    const { data: rec, error: dbError } = await supabase
+      .from('request_uploads')
+      .insert({
+        request_id:   requestId,
+        uploaded_by:  req.user.userId,
+        file_name:    file.originalname,
+        file_type:    file.mimetype,
+        file_size:    file.size,
+        storage_path: storagePath,
+        public_url:   urlData.publicUrl,
+        doc_type:     docType
+      })
+      .select().single();
+
+    if (dbError) {
+      errors.push({ file: file.originalname, error: dbError.message });
+    } else {
+      uploaded.push(rec);
+    }
+  }
+
+  const statusCode = uploaded.length === 0 ? 500 : 201;
+  res.status(statusCode).json({
+    uploaded,
+    errors:  errors.length ? errors : undefined,
+    message: `${uploaded.length} file(s) uploaded successfully`
+  });
+});
+
+// GET /api/requests/:requestId/uploads  — list files for a request
+app.get('/api/requests/:requestId/uploads', requireAuth, async (req, res) => {
+  const requestId = parseInt(req.params.requestId);
+  const { data: request } = await supabase
+    .from('requests').select('request_id,student_id').eq('request_id', requestId).single();
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  if (req.user.role !== 'admin' && request.student_id !== req.user.userId)
+    return res.status(403).json({ error: 'Not authorised' });
+
+  const { data, error } = await supabase
+    .from('request_uploads').select('*').eq('request_id', requestId).order('uploaded_at');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ uploads: data });
+});
+
+// DELETE /api/uploads/:uploadId  — delete a file (uploader or admin)
+app.delete('/api/uploads/:uploadId', requireAuth, async (req, res) => {
+  const { data: rec } = await supabase
+    .from('request_uploads').select('*').eq('upload_id', req.params.uploadId).single();
+  if (!rec) return res.status(404).json({ error: 'Upload not found' });
+  if (req.user.role !== 'admin' && rec.uploaded_by !== req.user.userId)
+    return res.status(403).json({ error: 'Not authorised' });
+
+  await supabase.storage.from(BUCKET).remove([rec.storage_path]);
+  await supabase.from('request_uploads').delete().eq('upload_id', req.params.uploadId);
+  res.json({ message: 'Deleted' });
+});
+
+// ═══════════════════════════════════════════════════════════
+// FAQ
+// ═══════════════════════════════════════════════════════════
+
 app.get('/api/faq', async (req, res) => {
   const { category } = req.query;
-  let query = supabase
-    .from('faq_entries')
-    .select('faq_id, category, question, answer, source')
-    .eq('is_published', true)
-    .order('category')
-    .order('sort_order')
-    .order('created_at');
-
-  if (category) query = query.eq('category', category);
-  const { data, error } = await query;
+  let q = supabase.from('faq_entries')
+    .select('faq_id,category,question,answer,source')
+    .eq('is_published', true).order('category').order('sort_order').order('created_at');
+  if (category) q = q.eq('category', category);
+  const { data, error } = await q;
   if (error) return res.status(500).json({ error: error.message });
   res.json({ faqs: data });
 });
 
-// GET /api/admin/faq  (admin — includes unpublished)
 app.get('/api/admin/faq', requireAdmin, async (req, res) => {
-  const { data, error } = await supabase
-    .from('faq_entries')
+  const { data, error } = await supabase.from('faq_entries')
     .select('*, creator:users!faq_entries_created_by_fkey(full_name)')
     .order('category').order('sort_order').order('created_at');
   if (error) return res.status(500).json({ error: error.message });
   res.json({ faqs: data });
 });
 
-// POST /api/admin/faq
 app.post('/api/admin/faq', requireAdmin, async (req, res) => {
   const { category, question, answer } = req.body;
-  const { data, error } = await supabase
-    .from('faq_entries')
+  const { data, error } = await supabase.from('faq_entries')
     .insert({ category, question, answer, source: 'admin_added', created_by: req.user.userId })
     .select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json({ faq: data });
 });
 
-// PUT /api/admin/faq/:id
 app.put('/api/admin/faq/:id', requireAdmin, async (req, res) => {
   const { category, question, answer, is_published } = req.body;
-  const { data, error } = await supabase
-    .from('faq_entries')
+  const { data, error } = await supabase.from('faq_entries')
     .update({ category, question, answer, is_published, updated_at: new Date().toISOString() })
-    .eq('faq_id', req.params.id)
-    .select().single();
+    .eq('faq_id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ faq: data });
 });
 
-// DELETE /api/admin/faq/:id  (only non-registry entries)
 app.delete('/api/admin/faq/:id', requireAdmin, async (req, res) => {
-  const { data: faq } = await supabase
-    .from('faq_entries').select('source').eq('faq_id', req.params.id).single();
+  const { data: faq } = await supabase.from('faq_entries').select('source').eq('faq_id', req.params.id).single();
   if (faq?.source === 'registry')
-    return res.status(403).json({ error: 'Base registry entries cannot be deleted' });
-
+    return res.status(403).json({ error: 'Registry entries cannot be deleted' });
   const { error } = await supabase.from('faq_entries').delete().eq('faq_id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ message: 'Deleted' });
 });
 
-// ═════════════════════════════════════════════════════════
-// FAQ SUBMISSIONS
-// ═════════════════════════════════════════════════════════
-
-// POST /api/faq/submit  (student)
 app.post('/api/faq/submit', requireAuth, async (req, res) => {
   const { question, rag_answer, rag_score } = req.body;
-  const { data, error } = await supabase
-    .from('faq_submissions')
+  const { data, error } = await supabase.from('faq_submissions')
     .insert({ student_id: req.user.userId, question, rag_answer, rag_score })
     .select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json({ submission: data });
 });
 
-// GET /api/admin/faq/submissions
 app.get('/api/admin/faq/submissions', requireAdmin, async (req, res) => {
   const { status } = req.query;
-  let query = supabase
-    .from('faq_submissions')
-    .select(`*, student:users!faq_submissions_student_id_fkey(full_name, student_id)`)
+  let q = supabase.from('faq_submissions')
+    .select('*, student:users!faq_submissions_student_id_fkey(full_name,student_id)')
     .order('submitted_at', { ascending: false });
-  if (status) query = query.eq('status', status);
-  const { data, error } = await query;
+  if (status) q = q.eq('status', status);
+  const { data, error } = await q;
   if (error) return res.status(500).json({ error: error.message });
   res.json({ submissions: data });
 });
 
-// PUT /api/admin/faq/submissions/:id  (approve or dismiss)
 app.put('/api/admin/faq/submissions/:id', requireAdmin, async (req, res) => {
   const { status, official_answer, category } = req.body;
-
-  const updateData = {
-    status,
-    admin_id:    req.user.userId,
-    actioned_at: new Date().toISOString()
-  };
+  const updateData = { status, admin_id: req.user.userId, actioned_at: new Date().toISOString() };
 
   if (status === 'approved') {
     if (!official_answer || !category)
-      return res.status(400).json({ error: 'official_answer and category required for approval' });
-
-    // Get the original question
-    const { data: sub } = await supabase
-      .from('faq_submissions').select('question').eq('submission_id', req.params.id).single();
-
-    // Create FAQ entry
-    const { data: faq } = await supabase
-      .from('faq_entries')
-      .insert({
-        category, question: sub.question, answer: official_answer,
-        source: 'student_submission', created_by: req.user.userId,
-        submission_id: parseInt(req.params.id)
-      })
+      return res.status(400).json({ error: 'official_answer and category required' });
+    const { data: sub } = await supabase.from('faq_submissions')
+      .select('question').eq('submission_id', req.params.id).single();
+    const { data: faq } = await supabase.from('faq_entries')
+      .insert({ category, question: sub.question, answer: official_answer,
+                source: 'student_submission', created_by: req.user.userId,
+                submission_id: parseInt(req.params.id) })
       .select().single();
-
     updateData.official_answer = official_answer;
     updateData.category        = category;
     updateData.faq_id          = faq.faq_id;
   }
 
-  const { data, error } = await supabase
-    .from('faq_submissions')
-    .update(updateData)
-    .eq('submission_id', req.params.id)
-    .select().single();
-
+  const { data, error } = await supabase.from('faq_submissions')
+    .update(updateData).eq('submission_id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ submission: data });
 });
 
-// ═════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // REPORTS
-// ═════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
-// GET /api/admin/reports/requests
 app.get('/api/admin/reports/requests', requireAdmin, async (req, res) => {
-  const { data: requests } = await supabase.from('requests').select('status, request_type');
-  const total   = requests.length;
+  const { data: requests } = await supabase.from('requests').select('status,request_type');
+  const total    = requests.length;
   const pending  = requests.filter(r => r.status === 'pending').length;
   const approved = requests.filter(r => r.status === 'approved').length;
   const denied   = requests.filter(r => r.status === 'denied').length;
-
-  const byType = requests.reduce((acc, r) => {
-    acc[r.request_type] = (acc[r.request_type] || 0) + 1; return acc;
-  }, {});
-
+  const byType   = requests.reduce((a,r) => { a[r.request_type]=(a[r.request_type]||0)+1; return a; }, {});
   res.json({ total, pending, approved, denied, byType });
 });
 
-// GET /api/admin/reports/faq
 app.get('/api/admin/reports/faq', requireAdmin, async (req, res) => {
-  const { data: faqs }        = await supabase.from('faq_entries').select('category, source');
-  const { data: submissions } = await supabase
-    .from('faq_submissions')
-    .select(`*, student:users!faq_submissions_student_id_fkey(full_name, student_id)`)
+  const { data: faqs }        = await supabase.from('faq_entries').select('category,source');
+  const { data: submissions } = await supabase.from('faq_submissions')
+    .select('*, student:users!faq_submissions_student_id_fkey(full_name,student_id)')
     .order('submitted_at', { ascending: false });
-
-  const byCategory = faqs.reduce((acc, f) => {
-    acc[f.category] = (acc[f.category] || 0) + 1; return acc;
-  }, {});
-  const bySource = faqs.reduce((acc, f) => {
-    acc[f.source] = (acc[f.source] || 0) + 1; return acc;
-  }, {});
-
-  res.json({
-    total: faqs.length,
-    byCategory, bySource,
-    submissions
-  });
+  const byCategory = faqs.reduce((a,f) => { a[f.category]=(a[f.category]||0)+1; return a; }, {});
+  const bySource   = faqs.reduce((a,f) => { a[f.source]=(a[f.source]||0)+1; return a; }, {});
+  res.json({ total: faqs.length, byCategory, bySource, submissions });
 });
 
-// ── Health check ──────────────────────────────────────────
-app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
-app.get('/', (req, res) => {
-  res.json({ 
-    status: 'running', 
-    message: 'UB Help Desk API is live',
-    version: '1.0.0'
-  });
-});
-// ── Start ─────────────────────────────────────────────────
+// ── Root + health ─────────────────────────────────────────
+app.get('/', (_req, res) => res.json({ status: 'running', message: 'UB Help Desk API is live', version: '1.0.0' }));
+app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+
 app.listen(PORT, () => {
   console.log(`\nUB Help Desk API running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/api/health\n`);
+  console.log(`Health: http://localhost:${PORT}/api/health\n`);
 });

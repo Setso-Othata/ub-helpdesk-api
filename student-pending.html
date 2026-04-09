@@ -5,78 +5,90 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UB Help Desk - Pending Requests</title>
 <link rel="stylesheet" href="style.css">
+<script src="shared.js"></script>
+<style>
+.empty-state{text-align:center;padding:60px 20px;color:var(--g400);}
+.empty-state .es-icon{font-size:48px;margin-bottom:16px;}
+.empty-state p{font-size:15px;font-weight:bold;color:var(--navy);margin-bottom:6px;}
+.empty-state span{font-size:13px;}
+.loading-state{text-align:center;padding:60px 20px;color:var(--g400);font-size:14px;}
+</style>
 </head>
 <body>
-
 <div class="topbar">
   <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
   <span class="topbar-user" id="topbar-name"></span>
-  <a href="index.html" class="topbar-logout">Log out</a>
+  <a href="index.html" class="topbar-logout" onclick="doLogout();return false;">Log out</a>
 </div>
-
 <div class="layout">
   <div class="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">Overview</div>
-      <a href="student-dashboard.html" class="sb-link">Dashboard</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Submit Request</div>
+    <div class="sb-section"><div class="sb-label">Overview</div><a href="student-dashboard.html" class="sb-link">Dashboard</a></div>
+    <div class="sb-section"><div class="sb-label">Submit Request</div>
       <a href="student-credits.html" class="sb-link">Extra Credits</a>
       <a href="student-addcourse.html" class="sb-link">Add a Course</a>
       <a href="student-dropcourse.html" class="sb-link">Drop a Course</a>
       <a href="student-program.html" class="sb-link">Change Program</a>
     </div>
-    <div class="sb-section">
-      <div class="sb-label">My Requests</div>
+    <div class="sb-section"><div class="sb-label">My Requests</div>
       <a href="student-pending.html" class="sb-link active">Pending</a>
       <a href="student-approved.html" class="sb-link">Approved</a>
       <a href="student-denied.html" class="sb-link">Denied</a>
     </div>
-    <div class="sb-section">
-      <div class="sb-label">Help</div>
-      <a href="student-faq.html" class="sb-link">FAQs</a>
-    </div>
+    <div class="sb-section"><div class="sb-label">Help</div><a href="student-faq.html" class="sb-link">FAQs</a></div>
   </div>
-
   <div class="main">
-    <div class="ph">
-      <h2>Pending Requests</h2>
-      <p>2 requests awaiting review</p>
-    </div>
-
-    <div class="ibox info" style="margin-bottom:16px;">Your requests are under review by Registry Services. You will be notified once a decision is made.</div>
-
-    <div class="rcard pending">
-      <div class="r-body">
-        <div class="r-title">Extra Credits &mdash; Requesting 21 credits total</div>
-        <div class="r-meta">12 Jan 2026 &nbsp;&middot;&nbsp; REQ0001</div>
-        <div class="r-reason">I am in my final semester and need 3 extra courses to graduate on time. My CGPA is 3.6 and I have no outstanding academic issues.</div>
-      </div>
-      <div class="r-right">
-        <span class="tbadge tbc">Extra Credit Load</span>
-        <span class="sp sp-pending">Pending</span>
-      </div>
-    </div>
-
-    <div class="rcard pending">
-      <div class="r-body">
-        <div class="r-title">Add Course &mdash; STAT201 Statistics I</div>
-        <div class="r-meta">03 Jan 2026 &nbsp;&middot;&nbsp; REQ0004</div>
-        <div class="r-reason">STAT201 is a required elective for my BBA concentration. My advisor recommended I take it in Semester 2 to complete the analytics track on time.</div>
-      </div>
-      <div class="r-right">
-        <span class="tbadge tba">Add a Course</span>
-        <span class="sp sp-pending">Pending</span>
-      </div>
-    </div>
+    <div class="ph"><h2>Pending Requests</h2><p id="subtitle">Loading…</p></div>
+    <div id="requestsList"><div class="loading-state">Loading your requests…</div></div>
   </div>
 </div>
-
-<script src="shared.js"></script>
 <script>
-  var u = requireStudent();
-  if (u) document.getElementById('topbar-name').textContent = u.name;
+var u = requireStudent();
+if (u) document.getElementById('topbar-name').textContent = u.name;
+
+var TYPE_LABELS = {
+  extra_credits:    {label:'Extra Credit Load',cls:'tbc'},
+  add_course:       {label:'Add a Course',     cls:'tba'},
+  drop_course:      {label:'Drop a Course',    cls:'tbd'},
+  change_programme: {label:'Change Programme', cls:'tbc'}
+};
+
+function fmt(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+
+async function loadRequests(){
+  try{
+    var res  = await apiFetch('/api/requests?status=pending');
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error||'Failed to load');
+    var reqs = data.requests||[];
+    document.getElementById('subtitle').textContent =
+      reqs.length===0?'No pending requests':
+      reqs.length===1?'1 request awaiting review':
+      reqs.length+' requests awaiting review';
+    var list = document.getElementById('requestsList');
+    if(!reqs.length){
+      list.innerHTML='<div class="empty-state"><div class="es-icon">📋</div><p>No pending requests</p><span>Requests you submit will appear here while awaiting review.</span></div>';
+      return;
+    }
+    list.innerHTML = reqs.map(function(r){
+      var t=TYPE_LABELS[r.request_type]||{label:r.request_type,cls:'tbc'};
+      return '<div class="rcard pending">'+
+        '<div class="r-body">'+
+          '<div class="r-title">'+r.subject+'</div>'+
+          '<div class="r-meta">'+fmt(r.submitted_at)+' &nbsp;&middot;&nbsp; '+r.ref_number+'</div>'+
+          '<div class="r-reason">'+r.reason+'</div>'+
+        '</div>'+
+        '<div class="r-right">'+
+          '<span class="tbadge '+t.cls+'">'+t.label+'</span>'+
+          '<span class="sp sp-pending">Pending</span>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }catch(err){
+    document.getElementById('requestsList').innerHTML=
+      '<div class="empty-state"><div class="es-icon">⚠️</div><p>Could not load requests</p><span>'+err.message+'</span></div>';
+  }
+}
+loadRequests();
 </script>
 </body>
 </html>

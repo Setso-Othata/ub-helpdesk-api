@@ -113,6 +113,8 @@ body { background: var(--navy); display: flex; align-items: center; justify-cont
 
   <button class="btn-login" onclick="doLogin()">Sign In</button>
 
+  <div id="loginError" style="display:none;margin-top:12px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:7px;font-size:13px;color:#c0392b;"></div>
+
   <div class="login-hint">
     <strong>Demo Credentials</strong><br>
     Student: <strong>UB23050001</strong> / <strong>student123</strong><br>
@@ -123,33 +125,74 @@ body { background: var(--navy); display: flex; align-items: center; justify-cont
 <script>
 var selectedRole = 'student';
 
+// ── Point this at your deployed API ──────────────────────
+// Local dev:  http://localhost:3000
+// Render:     https://ub-helpdesk-api.onrender.com
+var API_BASE = 'https://ub-helpdesk-api.onrender.com';
+
 function setRole(role) {
   selectedRole = role;
   document.getElementById('tab-student').classList.toggle('active', role === 'student');
   document.getElementById('tab-admin').classList.toggle('active', role === 'admin');
 }
 
-function doLogin() {
-  var id = document.getElementById('loginId').value.trim();
-  var pw = document.getElementById('loginPw').value.trim();
-  var students = {
-    'UB23050001': { pass: 'student123', name: 'Kefilwe Moeti' },
-    'UB23050002': { pass: 'student123', name: 'Tebogo Kgosi' }
-  };
-  var admins = {
-    'ADM001': { pass: 'admin123', name: 'Dr. Ruth Sebele' }
-  };
+function setError(msg) {
+  var el = document.getElementById('loginError');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
 
-  if (selectedRole === 'student') {
-    var s = students[id];
-    if (!s || s.pass !== pw) { alert('Invalid student ID or password.'); return; }
-    sessionStorage.setItem('ub_user', JSON.stringify({ role: 'student', id: id, name: s.name }));
-    window.location.href = 'student-dashboard.html';
-  } else {
-    var a = admins[id];
-    if (!a || a.pass !== pw) { alert('Invalid admin ID or password.'); return; }
-    sessionStorage.setItem('ub_user', JSON.stringify({ role: 'admin', id: id, name: a.name }));
-    window.location.href = 'admin-dashboard.html';
+function setLoading(on) {
+  var btn = document.querySelector('.btn-login');
+  btn.disabled = on;
+  btn.textContent = on ? 'Signing in…' : 'Sign In';
+}
+
+async function doLogin() {
+  var identifier = document.getElementById('loginId').value.trim();
+  var password   = document.getElementById('loginPw').value.trim();
+
+  if (!identifier || !password) { setError('Please enter your ID and password.'); return; }
+
+  setLoading(true);
+  setError('');
+
+  try {
+    var res = await fetch(API_BASE + '/api/auth/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ identifier, password })
+    });
+
+    var data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error || 'Invalid credentials. Please try again.');
+      return;
+    }
+
+    // Verify the role matches the selected tab
+    if (data.user.role !== selectedRole) {
+      setError('This account is not registered as a ' + selectedRole + '.');
+      return;
+    }
+
+    // Store JWT token + user profile
+    sessionStorage.setItem('ub_token', data.token);
+    sessionStorage.setItem('ub_user',  JSON.stringify({
+      role: data.user.role,
+      id:   data.user.id,
+      name: data.user.name
+    }));
+
+    window.location.href = data.user.role === 'admin'
+      ? 'admin-dashboard.html'
+      : 'student-dashboard.html';
+
+  } catch (err) {
+    setError('Could not connect to the server. Check your connection or try again shortly.');
+  } finally {
+    setLoading(false);
   }
 }
 </script>

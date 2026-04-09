@@ -7,280 +7,293 @@
 <link rel="stylesheet" href="style.css">
 <script src="shared.js"></script>
 <style>
-.section-divider {
-  display: flex; align-items: center; gap: 14px; margin: 28px 0 20px;
-}
-.section-divider h3 { font-size: 16px; font-weight: bold; color: var(--navy); white-space: nowrap; }
-.section-divider::after { content: ''; flex: 1; height: 1px; background: var(--g200); }
-.faq-rep-row { display: flex; gap: 12px; align-items: flex-start; padding: 13px 0; border-bottom: 1px solid var(--g200); }
-.faq-rep-row:last-child { border-bottom: none; }
-.faq-rep-num {
-  width: 26px; height: 26px; border-radius: 50%;
-  background: var(--navy); color: var(--gold);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: bold; flex-shrink: 0; margin-top: 1px;
-}
-.faq-rep-body { flex: 1; min-width: 0; }
-.faq-rep-q  { font-size: 13.5px; font-weight: bold; color: var(--navy); margin-bottom: 3px; }
-.faq-rep-a  { font-size: 12.5px; color: var(--g600); line-height: 1.55; margin-bottom: 5px; }
-.faq-rep-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.faq-rep-cat { padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; background: var(--blue-l); color: var(--blue); }
-.faq-rep-cat.new { background: var(--green-l); color: var(--green); }
-.faq-rep-source { font-size: 11px; color: var(--g400); }
-@media print {
-  .topbar, .sidebar, .print-btn { display: none !important; }
-  .main { padding: 0 !important; }
-  .layout { display: block !important; }
-}
+.section-divider{display:flex;align-items:center;gap:14px;margin:28px 0 20px;}
+.section-divider h3{font-size:16px;font-weight:bold;color:var(--navy);white-space:nowrap;}
+.section-divider::after{content:'';flex:1;height:1px;background:var(--g200);}
+.faq-rep-row{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--g200);}
+.faq-rep-row:last-child{border-bottom:none;}
+.faq-rep-num{width:26px;height:26px;border-radius:50%;background:var(--navy);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;flex-shrink:0;margin-top:1px;}
+.faq-rep-body{flex:1;min-width:0;}
+.faq-rep-q{font-size:13.5px;font-weight:bold;color:var(--navy);margin-bottom:3px;}
+.faq-rep-a{font-size:12.5px;color:var(--g600);line-height:1.55;margin-bottom:5px;}
+.faq-rep-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.faq-rep-cat{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:bold;background:var(--blue-l);color:var(--blue);}
+.faq-rep-cat.new{background:var(--green-l);color:var(--green);}
+.faq-rep-source{font-size:11px;color:var(--g400);}
+.loading-state{text-align:center;padding:40px 20px;color:var(--g400);font-size:14px;}
+@media print{.topbar,.sidebar,.print-btn{display:none!important;}.main{padding:0!important;}.layout{display:block!important;}}
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <span class="topbar-title">University of Botswana &mdash; Student Help Desk</span>
   <span class="topbar-user" id="topbar-name"></span>
-  <div class="bell-wrap">
-    <a href="admin-pending.html" class="bell-btn">Alerts</a>
-    <span class="bell-count">2</span>
-  </div>
-  <a href="index.html" class="topbar-logout">Log out</a>
+  <div class="bell-wrap"><a href="admin-pending.html" class="bell-btn">Alerts</a><span class="bell-count" id="pendingCount">…</span></div>
+  <a href="index.html" class="topbar-logout" onclick="doLogout();return false;">Log out</a>
 </div>
-
 <div class="layout">
   <div class="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">Overview</div>
-      <a href="admin-dashboard.html" class="sb-link">Dashboard</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Requests</div>
+    <div class="sb-section"><div class="sb-label">Overview</div><a href="admin-dashboard.html" class="sb-link">Dashboard</a></div>
+    <div class="sb-section"><div class="sb-label">Requests</div>
       <a href="admin-pending.html" class="sb-link">Pending</a>
       <a href="admin-approved.html" class="sb-link">Approved</a>
       <a href="admin-denied.html" class="sb-link">Denied</a>
     </div>
-    <div class="sb-section">
-      <div class="sb-label">Analytics</div>
-      <a href="admin-report.html" class="sb-link active">Reports</a>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">Help</div>
-      <a href="admin-faq.html" class="sb-link">FAQs</a>
-    </div>
+    <div class="sb-section"><div class="sb-label">Analytics</div><a href="admin-report.html" class="sb-link active">Reports</a></div>
+    <div class="sb-section"><div class="sb-label">Help</div><a href="admin-faq.html" class="sb-link">FAQs</a></div>
   </div>
-
   <div class="main">
     <div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;">
-      <div>
-        <h2>Requests Report</h2>
-        <p>Summary generated <span id="reportDate"></span></p>
-      </div>
+      <div><h2>Requests Report</h2><p>Summary generated <span id="reportDate"></span></p></div>
       <button class="print-btn" onclick="window.print()">Print Report</button>
     </div>
 
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-val">5</div><div class="stat-lbl">Total Requests</div><div class="stat-sub" style="color:var(--g400)">All time</div></div>
-      <div class="stat-card"><div class="stat-val">2</div><div class="stat-lbl">Pending</div><div class="stat-sub" style="color:var(--amber)">40% of total</div></div>
-      <div class="stat-card"><div class="stat-val">2</div><div class="stat-lbl">Approved</div><div class="stat-sub" style="color:var(--green)">40% approval rate</div></div>
-      <div class="stat-card"><div class="stat-val">1</div><div class="stat-lbl">Denied</div><div class="stat-sub" style="color:var(--red)">20% of total</div></div>
-    </div>
+    <!-- Request stats -->
+    <div class="stats-row" id="reqStats"><div class="loading-state">Loading…</div></div>
 
-    <div class="rep-grid">
+    <!-- Charts -->
+    <div class="rep-grid" id="reqCharts" style="display:none;">
       <div class="card">
         <div class="card-title">Requests by Type</div>
-        <div class="bar-row"><div class="bar-label">Extra Credit Load<span class="bar-sub">1 submission</span></div><div class="bar-track"><div class="bar-fill" style="width:20%;background:#1a56db;">20%</div></div><div class="bar-pct">20%</div></div>
-        <div class="bar-row"><div class="bar-label">Add a Course<span class="bar-sub">2 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--green);">40%</div></div><div class="bar-pct">40%</div></div>
-        <div class="bar-row"><div class="bar-label">Drop a Course<span class="bar-sub">2 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--red);">40%</div></div><div class="bar-pct">40%</div></div>
-        <div class="bar-row"><div class="bar-label">Change Program<span class="bar-sub">0 submissions</span></div><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber);"></div></div><div class="bar-pct">0%</div></div>
+        <div id="typeBars"></div>
       </div>
       <div class="card">
         <div class="card-title">Status Breakdown</div>
         <div class="dnut-wrap">
           <canvas id="donutCanvas" width="180" height="180"></canvas>
-          <div class="dnut-leg">
-            <div class="leg-item"><div class="leg-dot" style="background:#e67e22;"></div><div><div class="leg-val">2 &mdash; 40%</div><div style="font-size:11px;color:var(--g400)">Pending</div></div></div>
-            <div class="leg-item"><div class="leg-dot" style="background:#1a7a4a;"></div><div><div class="leg-val">2 &mdash; 40%</div><div style="font-size:11px;color:var(--g400)">Approved</div></div></div>
-            <div class="leg-item"><div class="leg-dot" style="background:#c0392b;"></div><div><div class="leg-val">1 &mdash; 20%</div><div style="font-size:11px;color:var(--g400)">Denied</div></div></div>
-            <div class="leg-item" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--g200);"><div class="leg-dot" style="background:var(--g300);"></div><div><div class="leg-val">5</div><div style="font-size:11px;color:var(--g400)">Total</div></div></div>
-          </div>
+          <div class="dnut-leg" id="donutLeg"></div>
         </div>
       </div>
     </div>
 
-    <div class="card">
+    <!-- All submissions table -->
+    <div class="card" id="allSubmissionsCard" style="display:none;">
       <div class="card-title">All Submissions</div>
       <table class="rep-tbl">
-        <thead>
-          <tr><th>ID</th><th>Student</th><th>Request</th><th>Type</th><th>Date</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0001</td><td><strong>Kefilwe Moeti</strong><br><span style="font-size:11px;color:var(--g400)">UB23050001</span></td><td>Extra Credits &mdash; Requesting 21 credits total</td><td><span class="tbadge tbc">Extra Credit Load</span></td><td>12 Jan 2026</td><td><span class="sp sp-pending">Pending</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0002</td><td><strong>Kefilwe Moeti</strong><br><span style="font-size:11px;color:var(--g400)">UB23050001</span></td><td>Add Course &mdash; CS401 Artificial Intelligence</td><td><span class="tbadge tba">Add a Course</span></td><td>08 Jan 2026</td><td><span class="sp sp-approved">Approved</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0003</td><td><strong>Tebogo Kgosi</strong><br><span style="font-size:11px;color:var(--g400)">UB23050002</span></td><td>Drop Course &mdash; MATH202 Linear Algebra</td><td><span class="tbadge tbd">Drop a Course</span></td><td>20 Dec 2025</td><td><span class="sp sp-denied">Denied</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0004</td><td><strong>Tebogo Kgosi</strong><br><span style="font-size:11px;color:var(--g400)">UB23050002</span></td><td>Add Course &mdash; STAT201 Statistics I</td><td><span class="tbadge tba">Add a Course</span></td><td>03 Jan 2026</td><td><span class="sp sp-pending">Pending</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:11px;color:var(--g400)">REQ0005</td><td><strong>Kefilwe Moeti</strong><br><span style="font-size:11px;color:var(--g400)">UB23050001</span></td><td>Drop Course &mdash; ENG101 Technical Writing</td><td><span class="tbadge tbd">Drop a Course</span></td><td>05 Jan 2026</td><td><span class="sp sp-approved">Approved</span></td></tr>
-        </tbody>
+        <thead><tr><th>ID</th><th>Student</th><th>Request</th><th>Type</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="allSubmissionsBody"></tbody>
       </table>
     </div>
-    <!-- ── FAQ REPORT SECTION ───────────────────────────── -->
+
+    <!-- FAQ section -->
     <div class="section-divider"><h3>FAQ Report</h3></div>
-
-    <!-- FAQ stat cards -->
-    <div class="stats-row" id="faqStats"></div>
-
-    <!-- FAQ by category bar chart -->
-    <div class="rep-grid">
-      <div class="card">
-        <div class="card-title">FAQs by Category</div>
-        <div id="faqCategoryBars"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">FAQs by Source</div>
-        <div id="faqSourceBars"></div>
-      </div>
+    <div class="stats-row" id="faqStats"><div class="loading-state">Loading…</div></div>
+    <div class="rep-grid" id="faqCharts" style="display:none;">
+      <div class="card"><div class="card-title">FAQs by Category</div><div id="faqCategoryBars"></div></div>
+      <div class="card"><div class="card-title">FAQs by Source</div><div id="faqSourceBars"></div></div>
     </div>
-
-    <!-- Student submitted questions table -->
     <div class="card" id="faqSubmittedCard">
       <div class="card-title">Student Submitted Questions</div>
-      <table class="rep-tbl" id="faqSubmittedTable">
-        <thead>
-          <tr><th>#</th><th>Student</th><th>Question</th><th>Date</th><th>Status</th></tr>
-        </thead>
-        <tbody id="faqSubmittedBody"></tbody>
-      </table>
-      <div id="faqSubmittedEmpty" style="display:none;" class="empty" style="padding:30px 0;">
-        <p>No student questions have been submitted yet.</p>
-      </div>
+      <div id="faqSubmittedContent"><div class="loading-state">Loading…</div></div>
     </div>
-
-    <!-- Full FAQ knowledge base listing -->
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
         <span>Full FAQ Knowledge Base</span>
         <span id="faqTotalLabel" style="font-size:12px;color:var(--g400);font-weight:normal;"></span>
       </div>
-      <div id="faqFullList"></div>
+      <div id="faqFullList"><div class="loading-state">Loading…</div></div>
     </div>
-
   </div>
 </div>
 
 <script>
-  var u = requireAdmin();
-  if (u) {
-    document.getElementById('topbar-name').textContent = u.name;
-    document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-    drawDonut('donutCanvas');
-    renderFaqReport();
-  }
+var u = requireAdmin();
+if (u) {
+  document.getElementById('topbar-name').textContent = u.name;
+  document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+}
 
-  // ── FAQ data helpers ─────────────────────────────────────
-  var BASE_FAQS = [
-    { id:'s001', category:'Course Registration', question:'How do I add a course to my registration?',         answer:'Navigate to the Add a Course service page from the sidebar. Review the requirements and visit the Registry Services Office. Additions are only permitted within the first two weeks of semester.',   source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s002', category:'Course Registration', question:'Can I drop a course after the semester has started?', answer:'Yes. Drops within Weeks 1 to 2 leave no academic record. After Week 4, a W (Withdrawal) grade is recorded on your transcript.',                                                                        source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s003', category:'Course Registration', question:'What happens to my fees if I drop a course?',        answer:'If you drop within the first two weeks, you may be eligible for a partial refund. After that period, the full tuition remains payable.',                                                              source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s004', category:'Course Registration', question:'What is the deadline to add or drop a course?',      answer:'Course additions close at the end of Week 2. Drops without financial penalty also close at the end of Week 2. After Week 4, a Withdrawal grade is recorded.',                                        source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s005', category:'Credit Load',         question:'What is the standard credit allocation per semester?', answer:'The standard allocation is 18 credits per semester. Taking more than 18 requires a formal Extra Credits request, subject to a minimum CGPA of 3.0.',                                              source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s006', category:'Credit Load',         question:'What CGPA do I need to apply for extra credits?',   answer:'A minimum CGPA of 3.0 is required. Students on academic probation are not eligible.',                                                                                                               source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s007', category:'Credit Load',         question:'How many extra credits can I take?',                answer:'The maximum overload permitted is typically 21 credits. Requests beyond 21 require exceptional circumstances and Dean approval.',                                                                     source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s008', category:'Programme Changes',   question:'How long does a programme change take to process?', answer:'Programme change requests take up to 15 working days to process after submission.',                                                                                                                  source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s009', category:'Programme Changes',   question:'Will my completed credits transfer if I change programmes?', answer:'Credits may be recognised by the receiving department at their discretion. A credit recognition assessment is conducted as part of the review.',                                            source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s010', category:'Programme Changes',   question:'What documents do I need to change my programme?', answer:'You need a formal motivation letter, approval from your current Faculty, and acceptance from the receiving Faculty.',                                                                                  source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s011', category:'General',             question:'How do I track the status of my request?',          answer:'Track requests under My Requests in the sidebar — listed as Pending, Approved, or Denied with full details and any admin notes.',                                                                    source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s012', category:'General',             question:'Who do I contact if my request is denied?',         answer:'You have the right to appeal within 5 working days. Contact the Faculty Dean Office with supporting documentation.',                                                                                 source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s013', category:'General',             question:'What are Registry Services office hours?',          answer:'Open Monday to Friday, 08:00 to 16:30. Email: registry@ub.bw or call +267 355 0000.',                                                                                                               source:'Registry', submittedBy:'Registry Services', isBase:true },
-    { id:'s014', category:'General',             question:'How long does it take to process a request?',       answer:'Add/Drop: 3–5 working days. Extra credits: 5–7 working days. Programme change: up to 15 working days.',                                                                                             source:'Registry', submittedBy:'Registry Services', isBase:true }
+var TYPE_LABELS = {
+  extra_credits:    {label:'Extra Credit Load', cls:'tbc', color:'#1a56db'},
+  add_course:       {label:'Add a Course',      cls:'tba', color:'var(--green)'},
+  drop_course:      {label:'Drop a Course',     cls:'tbd', color:'var(--red)'},
+  change_programme: {label:'Change Programme',  cls:'tbc', color:'var(--amber)'}
+};
+
+function fmt(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function pct(n,t){return t?Math.round(n/t*100):0;}
+
+function statCard(val,lbl,color,sub){
+  return '<div class="stat-card"><div class="stat-val">'+val+'</div><div class="stat-lbl">'+lbl+'</div><div class="stat-sub" style="color:'+color+'">'+sub+'</div></div>';
+}
+function barRow(label,sub,p,color){
+  return '<div class="bar-row">'+
+    '<div class="bar-label">'+label+'<span class="bar-sub">'+sub+'</span></div>'+
+    '<div class="bar-track"><div class="bar-fill" style="width:'+p+'%;background:'+color+';">'+(p>10?p+'%':'')+'</div></div>'+
+    '<div class="bar-pct">'+p+'%</div>'+
+  '</div>';
+}
+
+function drawDonutLive(pending, approved, denied) {
+  var total = pending + approved + denied;
+  var c = document.getElementById('donutCanvas');
+  if (!c) return;
+  var ctx = c.getContext('2d');
+  var vals = [
+    {v:pending,  col:'#e67e22'},
+    {v:approved, col:'#1a7a4a'},
+    {v:denied,   col:'#c0392b'}
   ];
+  ctx.clearRect(0,0,180,180);
+  if (!total) {
+    ctx.beginPath(); ctx.arc(90,90,78,0,Math.PI*2); ctx.fillStyle='var(--g200)'; ctx.fill();
+  } else {
+    var start = -Math.PI/2;
+    vals.forEach(function(v){
+      if (!v.v) return;
+      var sl = (v.v/total)*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(90,90); ctx.arc(90,90,78,start,start+sl);
+      ctx.fillStyle=v.col; ctx.fill(); start+=sl;
+    });
+  }
+  ctx.beginPath(); ctx.arc(90,90,46,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#0a1628'; ctx.font='bold 20px Arial'; ctx.textAlign='center'; ctx.fillText(total,90,86);
+  ctx.font='10px Arial'; ctx.fillStyle='#9a9aac'; ctx.fillText('total',90,102);
 
-  function getCustomFaqs()  { try{ return JSON.parse(sessionStorage.getItem('ub_custom_faqs') || '[]');  } catch(e){ return []; } }
-  function getSubmitted()   { try{ return JSON.parse(sessionStorage.getItem('ub_submitted_faqs') || '[]'); } catch(e){ return []; } }
-  function getAllFaqs()      { return BASE_FAQS.concat(getCustomFaqs()); }
+  document.getElementById('donutLeg').innerHTML =
+    '<div class="leg-item"><div class="leg-dot" style="background:#e67e22;"></div><div><div class="leg-val">'+pending+' &mdash; '+pct(pending,total)+'%</div><div style="font-size:11px;color:var(--g400)">Pending</div></div></div>'+
+    '<div class="leg-item"><div class="leg-dot" style="background:#1a7a4a;"></div><div><div class="leg-val">'+approved+' &mdash; '+pct(approved,total)+'%</div><div style="font-size:11px;color:var(--g400)">Approved</div></div></div>'+
+    '<div class="leg-item"><div class="leg-dot" style="background:#c0392b;"></div><div><div class="leg-val">'+denied+' &mdash; '+pct(denied,total)+'%</div><div style="font-size:11px;color:var(--g400)">Denied</div></div></div>'+
+    '<div class="leg-item" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--g200);"><div class="leg-dot" style="background:var(--g300);"></div><div><div class="leg-val">'+total+'</div><div style="font-size:11px;color:var(--g400)">Total</div></div></div>';
+}
 
-  function renderFaqReport() {
-    var all       = getAllFaqs();
-    var custom    = getCustomFaqs();
-    var submitted = getSubmitted();
-    var studentAdded = custom.filter(function(f){ return f.isNew; });
+async function loadReport() {
+  try {
+    // Fetch all requests and FAQs in parallel
+    var [resAll, resFaq, resSub, resP] = await Promise.all([
+      apiFetch('/api/admin/requests'),
+      apiFetch('/api/faq'),
+      apiFetch('/api/admin/faq/submissions'),
+      apiFetch('/api/admin/requests?status=pending')
+    ]);
+    var dataAll = await resAll.json();
+    var dataFaq = await resFaq.json();
+    var dataSub = await resSub.json();
+    var dataP   = await resP.json();
 
-    // ── Stat cards ─────────────────────────────────────────
-    var statsEl = document.getElementById('faqStats');
-    statsEl.innerHTML =
-      statCard(all.length,          'Total FAQs',              'var(--g400)', 'In knowledge base') +
-      statCard(BASE_FAQS.length,    'Base FAQs',               'var(--blue)', 'Registry authored') +
-      statCard(studentAdded.length, 'Student-Sourced FAQs',    'var(--green)', 'Approved from students') +
-      statCard(submitted.filter(function(q){ return q.status==='pending'; }).length, 'Pending Questions', 'var(--amber)', 'Awaiting review');
+    document.getElementById('pendingCount').textContent = (dataP.requests||[]).length;
 
-    // ── Category bars ──────────────────────────────────────
+    var reqs = dataAll.requests || [];
+
+    // ── Request stats ───────────────────────────────────
+    var total    = reqs.length;
+    var pending  = reqs.filter(function(r){return r.status==='pending';}).length;
+    var approved = reqs.filter(function(r){return r.status==='approved';}).length;
+    var denied   = reqs.filter(function(r){return r.status==='denied';}).length;
+
+    document.getElementById('reqStats').innerHTML =
+      statCard(total,    'Total Requests', 'var(--g400)', 'All time') +
+      statCard(pending,  'Pending',        'var(--amber)', pct(pending,total)+'% of total') +
+      statCard(approved, 'Approved',       'var(--green)', pct(approved,total)+'% approval rate') +
+      statCard(denied,   'Denied',         'var(--red)',   pct(denied,total)+'% of total');
+
+    // ── Charts ──────────────────────────────────────────
+    document.getElementById('reqCharts').style.display = '';
+    var typeCounts = {};
+    reqs.forEach(function(r){ typeCounts[r.request_type] = (typeCounts[r.request_type]||0)+1; });
+    var typeBarsEl = document.getElementById('typeBars');
+    typeBarsEl.innerHTML = '';
+    Object.keys(TYPE_LABELS).forEach(function(key){
+      var n = typeCounts[key]||0;
+      var t = TYPE_LABELS[key];
+      typeBarsEl.innerHTML += barRow(t.label, n+' submission'+(n===1?'':'s'), pct(n,total), t.color);
+    });
+    drawDonutLive(pending, approved, denied);
+
+    // ── All submissions table ───────────────────────────
+    document.getElementById('allSubmissionsCard').style.display = '';
+    var tbody = document.getElementById('allSubmissionsBody');
+    var sorted = reqs.slice().sort(function(a,b){return new Date(b.submitted_at)-new Date(a.submitted_at);});
+    tbody.innerHTML = sorted.map(function(r){
+      var t = TYPE_LABELS[r.request_type]||{label:r.request_type,cls:'tbc'};
+      var sName = r.student?r.student.full_name:'—';
+      var sId   = r.student?r.student.student_id:'—';
+      var spCls = r.status==='approved'?'sp-approved':r.status==='denied'?'sp-denied':'sp-pending';
+      var spLbl = r.status.charAt(0).toUpperCase()+r.status.slice(1);
+      return '<tr>'+
+        '<td style="font-family:monospace;font-size:11px;color:var(--g400)">'+r.ref_number+'</td>'+
+        '<td><strong>'+sName+'</strong><br><span style="font-size:11px;color:var(--g400)">'+sId+'</span></td>'+
+        '<td>'+r.subject+'</td>'+
+        '<td><span class="tbadge '+t.cls+'">'+t.label+'</span></td>'+
+        '<td>'+fmt(r.submitted_at)+'</td>'+
+        '<td><span class="sp '+spCls+'">'+spLbl+'</span></td>'+
+      '</tr>';
+    }).join('');
+
+    // ── FAQ stats ────────────────────────────────────────
+    var faqs = dataFaq.faqs || [];
+    var registryFaqs   = faqs.filter(function(f){return f.source==='registry';}).length;
+    var adminFaqs      = faqs.filter(function(f){return f.source==='admin_added';}).length;
+    var studentFaqs    = faqs.filter(function(f){return f.source==='student_submission';}).length;
+    var subs           = dataSub.submissions || [];
+    var pendingSubs    = subs.filter(function(s){return s.status==='pending';}).length;
+
+    document.getElementById('faqStats').innerHTML =
+      statCard(faqs.length,  'Total FAQs',          'var(--g400)',  'In knowledge base') +
+      statCard(registryFaqs, 'Registry FAQs',        'var(--blue)',  'Registry authored') +
+      statCard(studentFaqs,  'Student-Sourced FAQs', 'var(--green)', 'Approved from students') +
+      statCard(pendingSubs,  'Pending Questions',    'var(--amber)', 'Awaiting review');
+
+    // ── FAQ charts ───────────────────────────────────────
+    document.getElementById('faqCharts').style.display = '';
     var catCount = {};
-    all.forEach(function(f){ catCount[f.category] = (catCount[f.category] || 0) + 1; });
+    faqs.forEach(function(f){ catCount[f.category]=(catCount[f.category]||0)+1; });
     var catBarsEl = document.getElementById('faqCategoryBars');
     catBarsEl.innerHTML = '';
-    var cats = Object.keys(catCount).sort(function(a,b){ return catCount[b]-catCount[a]; });
-    cats.forEach(function(cat) {
-      var pct = Math.round(catCount[cat] / all.length * 100);
-      catBarsEl.innerHTML += barRow(cat, catCount[cat] + ' entr' + (catCount[cat]===1?'y':'ies'), pct, '#1a56db');
+    Object.keys(catCount).sort(function(a,b){return catCount[b]-catCount[a];}).forEach(function(cat){
+      catBarsEl.innerHTML += barRow(cat, catCount[cat]+' entr'+(catCount[cat]===1?'y':'ies'), pct(catCount[cat],faqs.length), '#1a56db');
     });
-
-    // ── Source bars ────────────────────────────────────────
     var srcBarsEl = document.getElementById('faqSourceBars');
-    var basePct   = Math.round(BASE_FAQS.length / all.length * 100);
-    var newPct    = all.length > BASE_FAQS.length ? 100 - basePct : 0;
     srcBarsEl.innerHTML =
-      barRow('Registry Services', BASE_FAQS.length + ' entries', basePct, 'var(--navy)') +
-      barRow('Student Submissions', studentAdded.length + ' entries', newPct, 'var(--green)');
+      barRow('Registry Services',  registryFaqs+' entries', pct(registryFaqs,faqs.length),  'var(--navy)') +
+      barRow('Admin Added',        adminFaqs+' entries',    pct(adminFaqs,faqs.length),     'var(--blue)') +
+      barRow('Student Submissions',studentFaqs+' entries',  pct(studentFaqs,faqs.length),   'var(--green)');
 
-    // ── Submitted questions table ──────────────────────────
-    var tbody = document.getElementById('faqSubmittedBody');
-    tbody.innerHTML = '';
-    if (!submitted.length) {
-      document.getElementById('faqSubmittedCard').querySelector('table').style.display = 'none';
-      document.getElementById('faqSubmittedEmpty').style.display = 'block';
+    // ── Student submitted questions ──────────────────────
+    var subContent = document.getElementById('faqSubmittedContent');
+    if (!subs.length) {
+      subContent.innerHTML = '<p style="padding:20px 0;color:var(--g400);font-size:13px;text-align:center;">No student questions submitted yet.</p>';
     } else {
-      submitted.forEach(function(q, i) {
-        var statusClass = q.status === 'approved' ? 'sp-approved' : q.status === 'dismissed' ? 'sp-denied' : 'sp-pending';
-        var statusLabel = q.status === 'approved' ? 'Approved' : q.status === 'dismissed' ? 'Dismissed' : 'Pending';
-        tbody.innerHTML +=
-          '<tr>' +
-            '<td style="font-family:monospace;font-size:11px;color:var(--g400)">' + (i+1) + '</td>' +
-            '<td><strong>' + q.submittedBy + '</strong>' + (q.studentId ? '<br><span style="font-size:11px;color:var(--g400)">' + q.studentId + '</span>' : '') + '</td>' +
-            '<td>' + q.question + '</td>' +
-            '<td>' + q.date + '</td>' +
-            '<td><span class="sp ' + statusClass + '">' + statusLabel + '</span></td>' +
+      subContent.innerHTML = '<table class="rep-tbl"><thead><tr><th>#</th><th>Student</th><th>Question</th><th>Date</th><th>Status</th></tr></thead><tbody>'+
+        subs.map(function(s,i){
+          var spCls = s.status==='approved'?'sp-approved':s.status==='dismissed'?'sp-denied':'sp-pending';
+          var spLbl = s.status.charAt(0).toUpperCase()+s.status.slice(1);
+          var sName = s.student?s.student.full_name:'—';
+          var sId   = s.student?s.student.student_id:'—';
+          return '<tr>'+
+            '<td style="font-family:monospace;font-size:11px;color:var(--g400)">'+(i+1)+'</td>'+
+            '<td><strong>'+sName+'</strong><br><span style="font-size:11px;color:var(--g400)">'+sId+'</span></td>'+
+            '<td>'+s.question+'</td>'+
+            '<td>'+fmt(s.submitted_at)+'</td>'+
+            '<td><span class="sp '+spCls+'">'+spLbl+'</span></td>'+
           '</tr>';
-      });
+        }).join('')+
+      '</tbody></table>';
     }
 
-    // ── Full FAQ list ──────────────────────────────────────
-    document.getElementById('faqTotalLabel').textContent = all.length + ' entries';
-    var listEl = document.getElementById('faqFullList');
-    listEl.innerHTML = '';
-    all.forEach(function(faq, i) {
-      listEl.innerHTML +=
-        '<div class="faq-rep-row">' +
-          '<div class="faq-rep-num">' + (i+1) + '</div>' +
-          '<div class="faq-rep-body">' +
-            '<div class="faq-rep-q">' + faq.question + '</div>' +
-            '<div class="faq-rep-a">' + faq.answer + '</div>' +
-            '<div class="faq-rep-meta">' +
-              '<span class="faq-rep-cat' + (faq.isNew ? ' new' : '') + '">' + faq.category + '</span>' +
-              '<span class="faq-rep-source">Source: ' + (faq.submittedBy || (faq.isNew ? 'Student submission' : 'Registry Services')) + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-    });
-  }
+    // ── Full FAQ list ────────────────────────────────────
+    document.getElementById('faqTotalLabel').textContent = faqs.length+' entries';
+    document.getElementById('faqFullList').innerHTML = faqs.length ? faqs.map(function(f,i){
+      var isNew = f.source!=='registry';
+      return '<div class="faq-rep-row">'+
+        '<div class="faq-rep-num">'+(i+1)+'</div>'+
+        '<div class="faq-rep-body">'+
+          '<div class="faq-rep-q">'+f.question+'</div>'+
+          '<div class="faq-rep-a">'+f.answer+'</div>'+
+          '<div class="faq-rep-meta">'+
+            '<span class="faq-rep-cat'+(isNew?' new':'')+'">'+f.category+'</span>'+
+            '<span class="faq-rep-source">Source: '+f.source.replace(/_/g,' ')+'</span>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join('') : '<p style="padding:20px 0;color:var(--g400);font-size:13px;text-align:center;">No FAQ entries found.</p>';
 
-  function statCard(val, lbl, color, sub) {
-    return '<div class="stat-card"><div class="stat-val">' + val + '</div><div class="stat-lbl">' + lbl + '</div><div class="stat-sub" style="color:' + color + '">' + sub + '</div></div>';
+  } catch(err) {
+    document.getElementById('reqStats').innerHTML = '<p style="color:var(--red);padding:20px;">Error loading report: '+err.message+'</p>';
   }
+}
 
-  function barRow(label, sub, pct, color) {
-    return '<div class="bar-row">' +
-      '<div class="bar-label">' + label + '<span class="bar-sub">' + sub + '</span></div>' +
-      '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + color + ';">' + (pct > 10 ? pct + '%' : '') + '</div></div>' +
-      '<div class="bar-pct">' + pct + '%</div>' +
-    '</div>';
-  }
+loadReport();
 </script>
 </body>
 </html>

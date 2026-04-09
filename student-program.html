@@ -250,16 +250,35 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <script>
+
+
+async function uploadDocuments(requestId, inputId, docType) {
+  var input = document.getElementById(inputId);
+  if (!input || !input.files || !input.files.length) return;
+  var formData = new FormData();
+  formData.append('doc_type', docType || 'supporting');
+  for (var i = 0; i < input.files.length; i++) {
+    formData.append('files', input.files[i]);
+  }
+  var token = getToken();
+  var res = await fetch(API_BASE + '/api/requests/' + requestId + '/uploads', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token },
+    body: formData
+  });
+  return await res.json();
+}
+
 async function submitProgForm(){
-  var currentProg  = document.getElementById('f_current_prog').value.trim();
-  var currentLevel = document.getElementById('f_current_level').value;
-  var intendedProg = document.getElementById('f_intended_prog').value.trim();
-  var intendedLevel= document.getElementById('f_intended_level').value;
-  var reason       = document.getElementById('f_reason').value.trim();
+  var currentProg=document.getElementById('f_current_prog').value.trim();
+  var currentLevel=document.getElementById('f_current_level').value;
+  var intendedProg=document.getElementById('f_intended_prog').value.trim();
+  var intendedLevel=document.getElementById('f_intended_level').value;
+  var reason=document.getElementById('f_reason').value.trim();
   if(!currentProg||!currentLevel||!intendedProg||!intendedLevel||!reason){
     showMsg('prog','error','Please fill in all required fields.');return;
   }
-  var subject='Programme Change: '+currentProg+' \u2192 '+intendedProg;
+  var subject='Programme Change: '+currentProg+' → '+intendedProg;
   var btn=document.getElementById('progSubmitBtn');
   btn.disabled=true;btn.textContent='Submitting…';
   try{
@@ -269,14 +288,37 @@ async function submitProgForm(){
     })});
     var data=await res.json();
     if(!res.ok) throw new Error(data.error||'Submission failed');
-    showMsg('prog','success','Programme change request submitted! Reference: '+data.request.ref_number+'. Track it under My Requests \u2192 Pending.');
-    btn.textContent='Submitted \u2713';
+    var requestId=data.request.request_id;
+    var tInput=document.getElementById('upload_transcript');
+    var sInput=document.getElementById('upload_supporting');
+    var hasFiles=(tInput&&tInput.files&&tInput.files.length)||(sInput&&sInput.files&&sInput.files.length);
+    if(hasFiles){
+      btn.textContent='Uploading documents…';
+      if(tInput&&tInput.files&&tInput.files.length) await uploadDocuments(requestId,'upload_transcript','transcript');
+      if(sInput&&sInput.files&&sInput.files.length) await uploadDocuments(requestId,'upload_supporting','supporting');
+    }
+    showMsg('prog','success','Programme change request submitted! Reference: '+data.request.ref_number+'. Track it under My Requests → Pending.');
+    btn.textContent='Submitted ✓';
   }catch(err){
     showMsg('prog','error',err.message||'Could not submit. Please try again.');
     btn.disabled=false;btn.textContent='Submit Programme Change Request';
   }
 }
 function showMsg(f,type,text){var el=document.getElementById(f+'FormMsg');el.textContent=text;el.className='fmsg '+type;el.style.display='block';el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('input[type=file]').forEach(function(inp){
+    inp.addEventListener('change',function(){
+      var lbl=inp.closest('label')||inp.parentElement;
+      var ex=lbl.querySelector('.ua-selected');if(ex)ex.remove();
+      if(inp.files&&inp.files.length){
+        var d=document.createElement('div');d.className='ua-selected';
+        d.style.cssText='margin-top:8px;font-size:12px;color:#1a7a4a;font-weight:bold;word-break:break-all;';
+        d.textContent=inp.files.length+' file'+(inp.files.length>1?'s':'')+' selected: '+Array.from(inp.files).map(function(f){return f.name;}).join(', ');
+        lbl.appendChild(d);
+      }
+    });
+  });
+});
 </script>
 </body>
 </html>
